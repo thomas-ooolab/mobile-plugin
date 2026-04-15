@@ -6,6 +6,6 @@ description: Accept ticket ID + requirements, execute full 5-step development wo
 # Specs
 
 
-Accept a **ticket ID** and **requirements** from the user, then execute the full development workflow defined in `.cursor/rules/development-workflow.mdc`.
+Accept a **ticket ID** and **requirements** from the user, then execute the full development workflow defined in `${CLAUDE_PLUGIN_ROOT}/rules/development-workflow.md`.
 
 **Strictly follow steps 1 → 5 in order.** Each step must be fully completed before moving to the next. Do not skip or reorder any step.

@@ -10,13 +10,13 @@ Run the project's MR workflow: create a Merge Request on GitLab using the glab C
 **Execute the script:**
 
 ```bash
-./.cursor/commands/scripts/merge_request.sh
+${CLAUDE_PLUGIN_ROOT}/commands/scripts/mr.sh
 ```
 
 The user can provide the MR title (the description part). Pass it via:
 
-- **Environment variable:** `MR_TITLE="Your title" ./.cursor/commands/scripts/merge_request.sh`
-- **CLI argument:** `./.cursor/commands/scripts/merge_request.sh -t "Your title"` or `./.cursor/commands/scripts/merge_request.sh --title "Your title"`
+- **Environment variable:** `MR_TITLE="Your title" ${CLAUDE_PLUGIN_ROOT}/commands/scripts/mr.sh`
+- **CLI argument:** `${CLAUDE_PLUGIN_ROOT}/commands/scripts/mr.sh -t "Your title"` or `${CLAUDE_PLUGIN_ROOT}/commands/scripts/mr.sh --title "Your title"`
 
 **Optional:** Set target branch with `MR_TARGET_BRANCH=feat/LOE-6156`. Use `--draft` for a draft MR, or `-l "label1,label2"` for labels.
 
@@ -53,7 +53,7 @@ feat: LOE-6156: Course Completion Pop-up & Recommendation Prompt
 | `docs`     | Documentation |
 | `chore`    | Chore (tooling, scripts, housekeeping) |
 
-If `release-notes.txt` exists and contains a ticket ID, the final MR title will include that ID (the script enforces this, same as [push.sh](scripts/push.sh) for commit messages).
+If `release-notes.txt` exists and contains a ticket ID, the final MR title will include that ID (the script enforces this, same as [push.sh](${CLAUDE_PLUGIN_ROOT}/commands/scripts/push.sh) for commit messages).
 
 ---
 
@@ -72,17 +72,17 @@ When the user runs `/mr` and provides a title (e.g. "Course Completion Pop-up & 
 4. Run:
 
 ```bash
-MR_TITLE="Course Completion Pop-up & Recommendation Prompt" ./.cursor/commands/scripts/merge_request.sh
+MR_TITLE="Course Completion Pop-up & Recommendation Prompt" ${CLAUDE_PLUGIN_ROOT}/commands/scripts/mr.sh
 ```
 
 or with target branch:
 
 ```bash
-MR_TARGET_BRANCH=feat/LOE-6156 MR_TITLE="Course Completion Pop-up & Recommendation Prompt" ./.cursor/commands/scripts/merge_request.sh
+MR_TARGET_BRANCH=feat/LOE-6156 MR_TITLE="Course Completion Pop-up & Recommendation Prompt" ${CLAUDE_PLUGIN_ROOT}/commands/scripts/mr.sh
 ```
 
 or via CLI:
 
 ```bash
-./.cursor/commands/scripts/merge_request.sh -t "Course Completion Pop-up & Recommendation Prompt"
+${CLAUDE_PLUGIN_ROOT}/commands/scripts/mr.sh -t "Course Completion Pop-up & Recommendation Prompt"
 ```

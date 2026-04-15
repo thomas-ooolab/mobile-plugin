@@ -11,7 +11,6 @@ Guidelines for git workflow, CI/CD integration, and development processes specif
 ## Related Guidelines
 
 This document covers development workflow and processes. For implementation details, see:
-- `@project-structure` - Project structure and package organization
 - `@clean-architecture` - Architecture patterns and implementation
 - `@testing-guidelines` - Testing strategies and commands
 - `@flutter-coding-standards` - Flutter implementation patterns
@@ -327,7 +326,7 @@ fvm flutter pub upgrade package_name
 ## Development Best Practices
 
 ### 1. Code Organization
-- Follow feature-based structure (see `@project-structure`)
+- Follow feature-based structure
 - Keep functions and classes focused
 - Use meaningful names
 - Organize imports properly
@@ -504,4 +503,4 @@ fvm dart run build_runner build -d
 - [Flutter Documentation](https://flutter.dev/docs)
 - [Dart Documentation](https://dart.dev/guides)
 - [GitLab CI/CD](https://docs.gitlab.com/ee/ci/)
-- Project-specific skills: `@clean-architecture`, `@testing-guidelines`, `@project-structure`, `@flutter-coding-standards`, `@state-management`, `@dart-coding-standards`, `@localization-guidelines`, `@bash-scripting-standards`, `@add-whitelabel-guidelines`
+- Project-specific skills: `@clean-architecture`, `@testing-guidelines`, `@flutter-coding-standards`, `@state-management`, `@dart-coding-standards`, `@localization-guidelines`, `@bash-scripting-standards`, `@add-whitelabel-guidelines`

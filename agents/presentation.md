@@ -87,5 +87,4 @@ Follow these project skills when implementing:
 - @clean-architecture – layer rules, no UI in domain/data
 - @state-management – Cubit pattern, service locator, bloc_lint
 - @flutter-coding-standards – widget classes, composition, performance
-- @project-structure – exact paths and conventions for lib/screens
 - @localization-guidelines – translation keys and usage

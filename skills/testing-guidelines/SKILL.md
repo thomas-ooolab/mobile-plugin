@@ -64,7 +64,7 @@ await tester.pumpWidgetWithMaterialApp(
   orientation: Orientation.landscape,  // Default: portrait
   currencyCubit: mockCurrencyCubit,
   appCubit: mockAppCubit,
-  courseRepository: mockCourseRepository,
+  userRepository: mockUserRepository,
   // ... and many more repositories/cubits
 );
 ```
@@ -530,7 +530,7 @@ testWidgets('uses custom repository', (tester) async {
   
   await tester.pumpWidgetWithMaterialApp(
     child: FeatureScreen(),
-    courseRepository: mockCustomRepository,
+    userRepository: mockCustomRepository,
   );
   
   verify(() => mockCustomRepository.getData()).called(1);
@@ -585,7 +585,7 @@ testWidgets('displays loading indicator when loading', (tester) async {
     ),
   );
   
-  expect(find.byType(VleCircleLoadingIndicator), findsOneWidget);
+  expect(find.byType(AppCircleLoadingIndicator), findsOneWidget);
 });
 ```
 

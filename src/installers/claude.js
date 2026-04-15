@@ -64,7 +64,7 @@ export async function syncClaude(projectDir, opts = {}) {
 
 async function copyScripts(projectDir, opts) {
   const { getSharedDir } = await import('../utils.js');
-  const scriptsDir = join(getSharedDir(), 'scripts');
+  const scriptsDir = join(getSharedDir(), 'commands', 'scripts');
   const targetDir = join(projectDir, '.claude', 'commands', 'scripts');
 
   if (!await fs.pathExists(scriptsDir)) return;

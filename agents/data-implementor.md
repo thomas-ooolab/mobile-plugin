@@ -17,7 +17,7 @@ When invoked:
 3. Run `dart run build_runner build --delete-conflicting-outputs` in `packages/data` after changing `.g.dart` inputs (API or models).
 
 **API layer** (`lib/src/remote/api/<feature>/`):
-- Define one Retrofit API per feature (e.g. `authentication_api.dart`, `workspace_api.dart`).
+- Define one Retrofit API per feature (e.g. `authentication_api.dart`, `<feature>_api.dart`).
 - Use `@RestApi()` and `abstract interface class XxxApi`; factory constructor `factory XxxApi(Dio dio) = _XxxApi`.
 - Use `part '../generated/<feature>/xxx_api.g.dart';` for generated code.
 - Define path constants (e.g. `const _path = '/auth';`) and document each method.
@@ -65,4 +65,4 @@ When invoked:
 - [ ] Register in `local_dependency_register.dart`
 - [ ] Export interface from `lib/src/local/local.dart`
 
-Provide concrete code following the patterns in `authentication_api.dart`, `authentication_service_impl.dart`, `workspace_api.dart`, and `service_provider.dart`. Prefer reusing existing model/entity types before introducing new DTOs.
+Provide concrete code following existing patterns in the repo's API classes, service implementations, and `service_provider.dart`. Prefer reusing existing model/entity types before introducing new DTOs.

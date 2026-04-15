@@ -3,7 +3,7 @@ name: clean-architecture
 description: "Clean Architecture guidelines covering layer separation, dependency rules, repositories, services, use cases, and data flow patterns"
 ---
 
-# LearningOS Clean Architecture Guidelines
+# Clean Architecture Guidelines
 
 ## Architecture Overview
 
@@ -308,8 +308,7 @@ packages/data/lib/
         ├── local_dependency_register.dart  # Local DI registration
         ├── authentication/                 # Token persistence
         ├── user/                           # User preferences/cache
-        ├── workspace/                      # Workspace cache
-        ├── biometric/                      # Biometric settings
+        ├── [feature]/                      # Feature-specific cache
         └── model/                          # Local storage models
 ```
 
@@ -540,14 +539,14 @@ packages/
 │   ├── src/remote/                # API services, Retrofit, network
 │   └── src/local/                 # Hive, SharedPreferences, SecureStorage
 ├── domain/                        # Repository interfaces & implementations
-├── vle_ui/                       # Reusable UI components
+├── ui_kit/                       # Reusable UI components
 └── shared_lint/                   # Shared lint rules
 ```
 
 ## Key Files
 
 - `lib/locator/locator.dart` - Dependency injection configuration
-- `lib/vle_application.dart` - App initialization and setup
+- `lib/app.dart` - App initialization and setup
 - `lib/core/state_management/` - State management utilities
 - `packages/data/lib/src/remote/network/` - Network configuration
 - `packages/data/lib/src/local/` - Local persistence

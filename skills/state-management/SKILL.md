@@ -1,269 +1,258 @@
 ---
 name: state-management
-description: "State management guidelines for Cubit and State files following bloc_lint rules"
+description: "State management guidelines for Cubit with flutter_bloc and injectable-based dependency injection"
 ---
 
 # Cubit State Management Guidelines
 
-## State Management Overview
+## Overview
 
-The project uses Cubit (a simplified BLoC) with `flutter_bloc` for state management. **Cubit is the recommended approach** for most use cases as it provides a simpler API while maintaining clear separation between UI and business logic. Use BLoC only when you need explicit event handling and complex event transformations.
+Use `flutter_bloc` + `bloc` for state management. **Cubit is the default** — simpler API, adequate for most screens. Use BLoC only when explicit events/transforms are needed.
 
-### Dependency Injection Pattern
+DI uses `injectable` (annotation-based) + `get_it` (container). Cubits, repositories, services, and use cases are registered via annotations; no manual service locator wrappers.
 
-**CRITICAL**: This project uses a **service locator pattern** via `GetIt` (see `lib/locator/locator.dart`).
-
-**ALWAYS use `context.repository.xxx` instead of `context.read<Repository>()`** for dependency injection.
-
-```dart
-// ✅ GOOD - Service locator pattern
-BlocProvider(
-  create: (context) => UserCubit(
-    userRepository: context.repository.user,           // ✅ Correct!
-    analyticsRepository: context.repository.analytics,  // ✅ Correct!
-  ),
-  child: const UserView(),
-);
-
-// ❌ BAD - Don't use context.read()
-BlocProvider(
-  create: (context) => UserCubit(
-    userRepository: context.read<UserRepository>(),          // ❌ Wrong!
-    analyticsRepository: context.read<AnalyticsRepository>(), // ❌ Wrong!
-  ),
-  child: const UserView(),
-);
-```
-
-**Available repositories through service locator:**
-```dart
-context.repository.user              // UserRepository
-context.repository.authentication    // AuthenticationRepository
-context.repository.session          // SessionRepository
-context.repository.course           // CourseRepository
-context.repository.assignments      // AssignmentRepository
-context.repository.notification     // NotificationRepository
-context.repository.crashlytics      // CrashlyticsRepository
-context.repository.point            // PointRepository
-context.repository.report           // ReportRepository
-context.repository.resource         // ResourceRepository
-context.repository.reward           // RewardRepository
-context.repository.children         // ChildrenRepository
-context.repository.banner           // BannerRepository
-context.repository.analytics        // AnalyticsRepository
-context.repository.configuration    // ConfigurationRepository
-context.repository.instructor       // InstructorRepository
-context.repository.booking          // BookingRepository
-context.repository.learningGroup    // LearningGroupRepository
-context.repository.workspace        // WorkspaceRepository
-context.repository.progress         // ProgressRepository
-context.repository.cart             // CartRepository
-context.repository.invoice          // InvoiceRepository
-context.repository.credit           // CreditRepository
-context.repository.creditAccount    // CreditAccountRepository
-context.repository.skill            // SkillRepository
-```
-
-**Other dependencies available:**
-```dart
-context.useCase                  // UseCaseProvider
-context.deviceUtil              // DeviceUtil
-context.appLink                 // AppLinkHandler
-context.timezone                // TimezoneHandler
-context.webViewManager          // WebViewManager
-context.permission              // AppPermission
-context.firebaseAnalytics       // FirebaseAnalytics
-context.firebasePerformance     // FirebasePerformance
-context.localNotification       // LocalNotification
-context.quickActions            // QuickActions
-context.internetConnection      // InternetConnection
-context.googleSignIn            // GoogleSignIn
-```
-
-## BLoC Lint Configuration
-
-This project follows the official BLoC lint rules from [bloclibrary.dev/lint](https://bloclibrary.dev/lint/). 
-
-### Setup
-Ensure `bloc_lint` is included in your `analysis_options.yaml`:
+## Packages
 
 ```yaml
-include: package:bloc_lint/recommended.yaml
+# pubspec.yaml
+dependencies:
+  bloc: ^8.0.0
+  flutter_bloc: ^8.0.0
+  equatable: ^2.0.0
+  get_it: ^7.0.0
+  injectable: ^2.0.0
+
+dev_dependencies:
+  bloc_test: ^9.0.0
+  mocktail: ^1.0.0
+  build_runner: ^2.0.0
+  injectable_generator: ^2.0.0
 ```
 
-### Key Lint Rules
-- **Use sealed classes for states**: Enables exhaustive pattern matching
-- **Make state fields final and immutable**: Prevents state mutation
-- **Use named parameters**: All constructor parameters must be named
-- **Avoid public mutable properties**: Keep state immutable
-- **Use const constructors**: Make states const when possible
+## Dependency Injection with injectable
 
-## State Management Structure
+### Setup
+
+1. Create DI configuration file:
+
+```dart
+// lib/locator/locator.dart
+import 'package:get_it/get_it.dart';
+import 'package:injectable/injectable.dart';
+import 'locator.config.dart';
+
+final getIt = GetIt.instance;
+
+@InjectableInit()
+void configureDependencies() => getIt.init();
+```
+
+2. Initialize before `runApp`:
+
+```dart
+void main() {
+  configureDependencies();
+  runApp(const App());
+}
+```
+
+3. Generate DI code:
+
+```bash
+fvm dart run build_runner build --delete-conflicting-outputs
+```
+
+### Annotations
+
+| Annotation | Use |
+|------------|-----|
+| `@injectable` | Register class (new instance per resolve) |
+| `@singleton` | Single shared instance |
+| `@lazySingleton` | Singleton created on first resolve |
+| `@Injectable(as: Interface)` | Register implementation against abstract interface |
+| `@module` | Third-party/external registrations |
+| `@factoryMethod` | Factory constructor registration |
+
+### Registering a Cubit
+
+```dart
+@injectable
+class FeatureCubit extends Cubit<FeatureState> {
+  FeatureCubit(this._repository) : super(const FeatureInitial());
+
+  final FeatureRepository _repository;
+
+  Future<void> loadFeature() async {
+    emit(const FeatureLoading());
+    try {
+      final features = await _repository.getFeatures();
+      emit(FeatureLoaded(features: features));
+    } catch (e) {
+      emit(FeatureError(message: e.toString()));
+    }
+  }
+}
+```
+
+### Registering a Repository (against abstract interface)
+
+```dart
+// Abstract
+abstract interface class FeatureRepository {
+  Future<List<Feature>> getFeatures();
+}
+
+// Implementation
+@Injectable(as: FeatureRepository)
+final class FeatureRepositoryImpl implements FeatureRepository {
+  FeatureRepositoryImpl(this._service);
+
+  final FeatureService _service;
+
+  @override
+  Future<List<Feature>> getFeatures() => _service.fetchAll();
+}
+```
+
+### External Modules
+
+```dart
+@module
+abstract class AppModule {
+  @lazySingleton
+  SharedPreferences get sharedPreferences => throw UnimplementedError();
+}
+```
+
+## Cubit Pattern
 
 ### File Organization
-- **Cubits** (Recommended): State management - `feature_cubit.dart`
-- **States**: Immutable state classes - `feature_state.dart`
-- **BLoCs** (Use only when needed): Complex event handling - `feature_bloc.dart`
-- **Events** (BLoC only): Immutable event classes - `feature_event.dart`
 
-### Naming Conventions
-- Cubit: `FeatureCubit`
-- State: `FeatureState`
-- BLoC: `FeatureBloc` (when needed)
-- Event: `FeatureEvent` (BLoC only)
+| File | Purpose |
+|------|---------|
+| `feature_cubit.dart` | Cubit class |
+| `feature_state.dart` | Sealed state classes |
+| `feature_bloc.dart` | BLoC (only when events needed) |
+| `feature_event.dart` | Events (BLoC only) |
 
-## State Management Patterns
-
-### Cubit Pattern (Recommended)
-Cubit is simpler than BLoC and is recommended for most use cases. It provides direct methods instead of events.
-
-**Important**: Use `CubitMixin` and `safeEmit` to prevent "Cubit already closed" errors:
+### Cubit Implementation
 
 ```dart
 // feature_cubit.dart
-class FeatureCubit extends Cubit<FeatureState> with CubitMixin<FeatureState> {
-  FeatureCubit({
-    required FeatureRepository repository,
-  }) : _repository = repository,
-       super(const FeatureInitial());
-  
+import 'package:bloc/bloc.dart';
+import 'package:injectable/injectable.dart';
+
+@injectable
+class FeatureCubit extends Cubit<FeatureState> {
+  FeatureCubit(this._repository) : super(const FeatureInitial());
+
   final FeatureRepository _repository;
-  
+
   Future<void> loadFeature() async {
+    emit(const FeatureLoading());
     try {
-      safeEmit(const FeatureLoading());
       final features = await _repository.getFeatures();
-      safeEmit(FeatureLoaded(features: features));
+      emit(FeatureLoaded(features: features));
     } catch (e) {
-      safeEmit(FeatureError(message: e.toString()));
+      emit(FeatureError(message: e.toString()));
     }
   }
-  
-  void updateFeature({required String id}) {
-    safeEmit(const FeatureLoading());
-    // Business logic
-    safeEmit(FeatureLoaded(features: updatedData));
-  }
+
+  void reset() => emit(const FeatureInitial());
 }
 ```
 
-**Key Points**:
-- Mix in `CubitMixin<YourState>` to your Cubit
-- Use `safeEmit` instead of `emit` to handle closed Cubit scenarios
-- Always use named parameters in constructor
-- Initialize with const state when possible
+**Rules:**
+- Extend `Cubit<State>` from `bloc` package
+- Inject dependencies via constructor; `@injectable` handles wiring
+- `emit()` is safe after `close()` in `bloc` ^8 — framework ignores emissions on closed cubit (logs warning). No custom `safeEmit` mixin needed.
+- For explicit guard, check `isClosed` before async emit if desired.
 
-
-## State Classes
-
-### Best Practices
-- Use `equatable` for state classes to enable proper comparison
-- Make states immutable
-- Include all necessary data in state
-- Use sealed classes for better type safety
-- **Always use named parameters** in state constructors
+### State Classes (sealed + equatable)
 
 ```dart
 // feature_state.dart
+import 'package:equatable/equatable.dart';
+
 sealed class FeatureState extends Equatable {
   const FeatureState();
+
+  @override
+  List<Object?> get props => [];
 }
 
-class FeatureInitial extends FeatureState {
+final class FeatureInitial extends FeatureState {
   const FeatureInitial();
-  
-  @override
-  List<Object?> get props => [];
 }
 
-class FeatureLoading extends FeatureState {
+final class FeatureLoading extends FeatureState {
   const FeatureLoading();
-  
-  @override
-  List<Object?> get props => [];
 }
 
-class FeatureLoaded extends FeatureState {
-  const FeatureLoaded({
-    required this.features,
-  });
-  
+final class FeatureLoaded extends FeatureState {
+  const FeatureLoaded({required this.features});
+
   final List<Feature> features;
-  
+
   @override
   List<Object?> get props => [features];
 }
 
-class FeatureError extends FeatureState {
-  const FeatureError({
-    required this.message,
-  });
-  
+final class FeatureError extends FeatureState {
+  const FeatureError({required this.message});
+
   final String message;
-  
+
   @override
   List<Object?> get props => [message];
 }
 ```
 
+**Rules:**
+- `sealed` parent → exhaustive pattern matching
+- All fields `final`
+- Named constructor params
+- `const` constructors where possible
+- Override `props` from `Equatable`
 
 ## UI Integration
 
-### Dependency Injection with Service Locator
+### Providing a Cubit
 
-This project uses a **service locator pattern** via `GetIt` (see `lib/locator/locator.dart`). 
-
-**ALWAYS use `context.repository.xxx` instead of `context.read<Repository>()`** for dependency injection.
+Resolve via `getIt` inside `BlocProvider`:
 
 ```dart
-// Available through BuildContext extension:
-context.repository.user           // UserRepository
-context.repository.authentication  // AuthenticationRepository
-context.repository.session        // SessionRepository
-context.repository.course         // CourseRepository
-context.repository.notification   // NotificationRepository
-context.repository.analytics      // AnalyticsRepository
-// ... and all other repositories
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:myapp/locator/locator.dart';
 
-// Also available:
-context.useCase                   // UseCaseProvider
-context.deviceUtil                // DeviceUtil
-context.firebaseAnalytics        // FirebaseAnalytics
-context.permission               // AppPermission
-```
-
-### Using Cubit in Widgets
-
-Always use named parameters and inject dependencies via service locator:
-
-```dart
-// feature_screen.dart
 class FeatureScreen extends StatelessWidget {
   const FeatureScreen({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => FeatureCubit(
-        repository: context.repository.feature, // ✅ Use service locator
-      ),
+      create: (_) => getIt<FeatureCubit>()..loadFeature(),
       child: const FeatureView(),
     );
   }
 }
+```
 
+### Consuming State
+
+```dart
 class FeatureView extends StatelessWidget {
   const FeatureView({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<FeatureCubit, FeatureState>(
       builder: (context, state) {
         return switch (state) {
+          FeatureInitial() => const SizedBox.shrink(),
           FeatureLoading() => const CircularProgressIndicator(),
           FeatureLoaded(:final features) => FeatureList(features: features),
-          FeatureError(:final message) => ErrorWidget(message: message),
-          FeatureInitial() => const SizedBox.shrink(),
+          FeatureError(:final message) => ErrorView(message: message),
         };
       },
     );
@@ -271,113 +260,97 @@ class FeatureView extends StatelessWidget {
 }
 ```
 
-**Real-world example with multiple dependencies:**
+### Calling Cubit Methods
 
 ```dart
-class UserProfileScreen extends StatelessWidget {
-  const UserProfileScreen({required this.userId, super.key});
+// Trigger from widget
+context.read<FeatureCubit>().loadFeature();
 
-  final String userId;
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => UserProfileCubit(
-        userRepository: context.repository.user,         // ✅ Service locator
-        analyticsRepository: context.repository.analytics, // ✅ Service locator
-      )..loadProfile(userId),
-      child: const UserProfileView(),
-    );
-  }
-}
-```
-
-**Example with use cases:**
-
-```dart
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => LoginCubit(
-        authenticationRepository: context.repository.authentication,
-        userRepository: context.repository.user,
-        determineAccountUseCase: context.useCase.determineAccount,
-      ),
-      child: const LoginView(),
-    );
-  }
-}
+// With param
+context.read<FeatureCubit>().selectFeature(id: '1');
 ```
 
 ### BlocListener and MultiBlocListener
 
-When you need **more than two** BlocListeners (i.e. three or more), use **MultiBlocListener** instead of nesting multiple `BlocListener` widgets. For exactly two listeners, prefer **MultiBlocListener** as well for a flatter tree and consistent style.
+Two+ listeners → `MultiBlocListener` (flatter tree):
 
 ```dart
-// ✅ GOOD – MultiBlocListener when you have two or more listeners
 MultiBlocListener(
   listeners: [
-    BlocListener<CourseBroadcastCubit, CourseBroadcastState>(
-      listenWhen: (previous, current) => current.event == CourseBroadcastEvent.jumpToRecommendationTab,
-      listener: (_, _) => _homeCubit.changeTab(HomeTabTypes.myLearning),
-    ),
-    BlocListener<HomeCubit, HomeState>(
-      listenWhen: (previous, current) => previous.shouldEnableFreshChat != current.shouldEnableFreshChat,
-      listener: (_, state) {
-        if (state.shouldEnableFreshChat) FreshChatButton.show(context);
+    BlocListener<AuthCubit, AuthState>(
+      listenWhen: (prev, curr) => prev.isLoggedIn != curr.isLoggedIn,
+      listener: (context, state) {
+        if (!state.isLoggedIn) Navigator.of(context).pushReplacementNamed('/login');
       },
     ),
-  ],
-  child: BlocConsumer<HomeCubit, HomeState>(...),
-);
-
-// ❌ AVOID – Nesting many BlocListeners
-BlocListener<A, AState>(
-  listener: ...,
-  child: BlocListener<B, BState>(
-    listener: ...,
-    child: BlocListener<C, CState>(
-      listener: ...,
-      child: ...,
+    BlocListener<NotificationCubit, NotificationState>(
+      listenWhen: (prev, curr) => curr.hasNew,
+      listener: (context, state) => _showSnackBar(context, state.message),
     ),
-  ),
-),
+  ],
+  child: BlocBuilder<AuthCubit, AuthState>(builder: ...),
+);
 ```
 
-## Error Handling
-
-### Cubit Error Handling
-- Always handle errors in Cubit methods
-- Emit error states with meaningful messages
-- Log errors for debugging
-- Provide user-friendly error messages
-- Use try-catch blocks in all async operations
+### Multiple Providers
 
 ```dart
-Future<void> loadFeature() async {
-  try {
-    emit(const FeatureLoading());
-    final features = await _repository.getFeatures();
-    emit(FeatureLoaded(features: features));
-  } catch (e, stackTrace) {
-    // Log error for debugging
-    logger.error('Failed to load features', error: e, stackTrace: stackTrace);
-    // Emit user-friendly error state
-    emit(FeatureError(message: 'Failed to load features. Please try again.'));
+MultiBlocProvider(
+  providers: [
+    BlocProvider(create: (_) => getIt<FeatureCubit>()),
+    BlocProvider(create: (_) => getIt<AnotherCubit>()),
+  ],
+  child: const FeatureView(),
+);
+```
+
+## BLoC (when events needed)
+
+Use BLoC when:
+- Debouncing / throttling events (`EventTransformer`)
+- Multiple event types compose into one state stream
+- Complex event ordering
+
+```dart
+@injectable
+class SearchBloc extends Bloc<SearchEvent, SearchState> {
+  SearchBloc(this._repository) : super(const SearchInitial()) {
+    on<QueryChanged>(_onQueryChanged, transformer: debounce(const Duration(milliseconds: 300)));
+    on<SearchCleared>(_onSearchCleared);
+  }
+
+  final SearchRepository _repository;
+
+  Future<void> _onQueryChanged(QueryChanged event, Emitter<SearchState> emit) async {
+    emit(const SearchLoading());
+    try {
+      final results = await _repository.search(event.query);
+      emit(SearchLoaded(results: results));
+    } catch (e) {
+      emit(SearchError(message: e.toString()));
+    }
+  }
+
+  void _onSearchCleared(SearchCleared event, Emitter<SearchState> emit) {
+    emit(const SearchInitial());
   }
 }
 ```
 
-## Testing Cubits
+Event transformer example:
 
-### Unit Testing with bloc_test
+```dart
+import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:stream_transform/stream_transform.dart';
 
-Use the `bloc_test` package for testing Cubits.
+EventTransformer<T> debounce<T>(Duration duration) {
+  return (events, mapper) => events.debounce(duration).switchMap(mapper);
+}
+```
 
-**IMPORTANT**: Mock classes MUST be private (prefixed with underscore).
+## Testing
+
+Use `bloc_test` + `mocktail`. Mocks **must be private** (`_MockXxx`).
 
 ```dart
 // feature_cubit_test.dart
@@ -385,380 +358,230 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
-// ✅ GOOD - Private mock class
 class _MockFeatureRepository extends Mock implements FeatureRepository {}
 
 void main() {
   group('FeatureCubit', () {
-    late FeatureCubit featureCubit;
-    late _MockFeatureRepository mockRepository;
-    
+    late FeatureCubit cubit;
+    late _MockFeatureRepository repository;
+
     setUp(() {
-      mockRepository = _MockFeatureRepository();
-      featureCubit = FeatureCubit(
-        repository: mockRepository,
-      );
+      repository = _MockFeatureRepository();
+      cubit = FeatureCubit(repository);
     });
-    
-    tearDown(() {
-      featureCubit.close();
-    });
-    
+
+    tearDown(() => cubit.close());
+
     test('initial state is FeatureInitial', () {
-      expect(featureCubit.state, equals(const FeatureInitial()));
+      expect(cubit.state, equals(const FeatureInitial()));
     });
-    
-    group('loadFeature', () {
-      final mockFeatures = [
-        Feature(id: '1', name: 'Feature 1'),
-        Feature(id: '2', name: 'Feature 2'),
-      ];
-      
-      blocTest<FeatureCubit, FeatureState>(
-        'emits [FeatureLoading, FeatureLoaded] when loadFeature succeeds',
-        build: () {
-          when(() => mockRepository.getFeatures())
-              .thenAnswer((_) async => mockFeatures);
-          return featureCubit;
-        },
-        act: (cubit) => cubit.loadFeature(),
-        expect: () => [
-          const FeatureLoading(),
-          FeatureLoaded(features: mockFeatures),
-        ],
-        verify: (_) {
-          verify(() => mockRepository.getFeatures()).called(1);
-        },
-      );
-      
-      blocTest<FeatureCubit, FeatureState>(
-        'emits [FeatureLoading, FeatureError] when loadFeature fails',
-        build: () {
-          when(() => mockRepository.getFeatures())
-              .thenThrow(Exception('Failed to load'));
-          return featureCubit;
-        },
-        act: (cubit) => cubit.loadFeature(),
-        expect: () => [
-          const FeatureLoading(),
-          isA<FeatureError>(),
-        ],
-      );
-    });
+
+    blocTest<FeatureCubit, FeatureState>(
+      'emits [FeatureLoading, FeatureLoaded] on success',
+      build: () {
+        when(() => repository.getFeatures()).thenAnswer((_) async => const [Feature(id: '1', name: 'A')]);
+        return cubit;
+      },
+      act: (c) => c.loadFeature(),
+      expect: () => [
+        const FeatureLoading(),
+        const FeatureLoaded(features: [Feature(id: '1', name: 'A')]),
+      ],
+      verify: (_) => verify(() => repository.getFeatures()).called(1),
+    );
+
+    blocTest<FeatureCubit, FeatureState>(
+      'emits [FeatureLoading, FeatureError] on failure',
+      build: () {
+        when(() => repository.getFeatures()).thenThrow(Exception('boom'));
+        return cubit;
+      },
+      act: (c) => c.loadFeature(),
+      expect: () => [
+        const FeatureLoading(),
+        isA<FeatureError>(),
+      ],
+    );
   });
 }
 ```
 
-**Why private mocks?**
-- Prevents accidental usage outside test file
-- Follows encapsulation best practices
-- Makes it clear mocks are test-only
-- Aligns with Dart's privacy conventions
+### Testing with injectable
 
-## Best Practices
+For widget/integration tests, override registrations:
 
-### General Guidelines
-1. **Prefer Cubits over BLoCs**: Use Cubit for most use cases; only use BLoC when you need explicit event handling
-2. **Keep Cubits focused**: Each Cubit should handle one feature or screen
-3. **Avoid business logic in UI**: Keep all business logic in Cubits
-4. **Handle all states**: Always handle loading, success, and error states
-5. **Use proper error handling**: Implement try-catch blocks in all async operations
-6. **Test thoroughly**: Write comprehensive tests for all Cubits
-7. **Follow naming conventions**: Use consistent naming across the project
-8. **Use CubitMixin and safeEmit**: Always mix in `CubitMixin` and use `safeEmit` instead of `emit`
+```dart
+setUp(() {
+  getIt.reset();
+  getIt.registerFactory<FeatureRepository>(() => _MockFeatureRepository());
+  configureDependencies(); // or manual registers
+});
+```
 
-### Testing Guidelines
-9. **Mock classes MUST be private**: Prefix all mock classes with underscore
-   ```dart
-   // ✅ GOOD
-   class _MockUserRepository extends Mock implements UserRepository {}
-   
-   // ❌ BAD
-   class MockUserRepository extends Mock implements UserRepository {}
-   ```
+## BLoC Lint
 
-### Dependency Injection Guidelines
-10. **ALWAYS use service locator**: Use `context.repository.xxx` instead of `context.read<Repository>()`
-   ```dart
-   // ✅ GOOD - Service locator pattern
-   BlocProvider(
-     create: (context) => UserCubit(
-       userRepository: context.repository.user,
-       analyticsRepository: context.repository.analytics,
-     ),
-     child: const UserView(),
-   );
-   
-   // ❌ BAD - Don't use context.read()
-   BlocProvider(
-     create: (context) => UserCubit(
-       userRepository: context.read<UserRepository>(), // ❌ Wrong!
-       analyticsRepository: context.read<AnalyticsRepository>(), // ❌ Wrong!
-     ),
-     child: const UserView(),
-   );
-   ```
+Include `bloc_lint` in `analysis_options.yaml`:
 
-11. **Use BuildContext extensions**: Access dependencies through context extensions
-    ```dart
-    // Repositories
-    context.repository.user
-    context.repository.authentication
-    context.repository.course
-    context.repository.notification
-    
-    // Use Cases
-    context.useCase.determineAccount
-    context.useCase.synchronizeInformation
-    
-    // Utilities
-    context.deviceUtil
-    context.permission
-    context.firebaseAnalytics
-    ```
+```yaml
+include: package:bloc_lint/recommended.yaml
+```
 
-12. **Inject dependencies through constructor**: All Cubit dependencies must be injected via constructor
-    ```dart
-    // ✅ GOOD - Constructor injection with named parameters
-    class UserProfileCubit extends Cubit<UserProfileState> 
-        with CubitMixin<UserProfileState> {
-      UserProfileCubit({
-        required UserRepository userRepository,
-        required AnalyticsRepository analyticsRepository,
-      }) : _userRepository = userRepository,
-           _analyticsRepository = analyticsRepository,
-           super(const UserProfileInitial());
-      
-      final UserRepository _userRepository;
-      final AnalyticsRepository _analyticsRepository;
-    }
-    
-    // ❌ BAD - Don't use getIt directly in Cubit
-    class UserProfileCubit extends Cubit<UserProfileState> {
-      UserProfileCubit() : super(const UserProfileInitial());
-      
-      final _userRepository = getIt<UserRepository>(); // ❌ Wrong!
-    }
-    ```
+Key rules:
+- Sealed state classes → exhaustive pattern matching
+- `final` state fields → immutability
+- Named constructor params
+- Const constructors where possible
 
-### BLoC Lint Compliance
-13. **Always use named parameters**: All constructor parameters must be named
-    ```dart
-    // ✅ Good
-    FeatureCubit({required FeatureRepository repository})
-    
-    // ❌ Bad
-    FeatureCubit(FeatureRepository repository)
-    ```
+Run linter:
 
-14. **Use sealed classes for states**: Enables exhaustive pattern matching
-    ```dart
-    // ✅ Good
-    sealed class FeatureState extends Equatable {}
-    
-    // ❌ Bad
-    abstract class FeatureState extends Equatable {}
-    ```
-
-15. **Make state fields final and immutable**: All state properties must be final
-    ```dart
-    // ✅ Good
-    class FeatureLoaded extends FeatureState {
-      const FeatureLoaded({required this.features});
-      final List<Feature> features;
-    }
-    
-    // ❌ Bad
-    class FeatureLoaded extends FeatureState {
-      FeatureLoaded({required this.features});
-      List<Feature> features;
-    }
-    ```
-
-16. **Use const constructors**: Make states const when possible for better performance
-    ```dart
-    // ✅ Good
-    safeEmit(const FeatureLoading());
-    
-    // ❌ Bad
-    safeEmit(FeatureLoading());
-    ```
-
-17. **Use pattern matching**: Leverage Dart 3 pattern matching with sealed classes
-    ```dart
-    // ✅ Good
-    return switch (state) {
-      FeatureLoading() => const CircularProgressIndicator(),
-      FeatureLoaded(:final features) => FeatureList(features: features),
-      FeatureError(:final message) => ErrorWidget(message: message),
-      FeatureInitial() => const SizedBox.shrink(),
-    };
-    ```
-
-### Running BLoC Linter
-To check compliance with bloc_lint rules:
 ```bash
-# Install bloc_tools globally (with FVM if applicable)
 fvm dart pub global activate bloc_tools
-
-# Run the linter
 bloc lint .
 ```
 
-## Common Mistakes to Avoid
+## Error Handling
 
-### ❌ Don't: Use context.read() for dependency injection
+- Wrap async body in `try/catch`
+- Emit error state with message
+- Log via `logger` or `developer.log` for debugging
+- Map exceptions → user-friendly messages
+
 ```dart
-// ❌ BAD - Don't use context.read()
-class UserScreen extends StatelessWidget {
-  const UserScreen({super.key});
-  
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => UserCubit(
-        userRepository: context.read<UserRepository>(), // ❌ Wrong!
-      ),
-      child: const UserView(),
-    );
+Future<void> loadFeature() async {
+  emit(const FeatureLoading());
+  try {
+    final features = await _repository.getFeatures();
+    emit(FeatureLoaded(features: features));
+  } catch (e, stack) {
+    log('Failed to load features', error: e, stackTrace: stack);
+    emit(const FeatureError(message: 'Failed to load. Try again.'));
   }
 }
 ```
 
-### ✅ Do: Use service locator (context.repository.xxx)
+## Best Practices
+
+1. **Cubit by default, BLoC when needed** — prefer simpler API
+2. **One Cubit per feature/screen** — keep focused
+3. **No business logic in widgets** — delegate to Cubit
+4. **Handle all states** — initial, loading, loaded, error
+5. **Named constructor params** — required by `bloc_lint`
+6. **Sealed state + `final` fields** — enables pattern matching + immutability
+7. **`@injectable` on cubits/repos** — constructor injection auto-wired
+8. **Resolve via `getIt<Cubit>()` inside `BlocProvider.create`** — never call `getIt` inside widget `build` except in `create` callback
+9. **Private mocks in tests** — `_MockXxx extends Mock`
+10. **`const` state constructors** — reduce rebuilds
+
+## Common Mistakes
+
+### ❌ Manual GetIt call inside Cubit
+
 ```dart
-// ✅ GOOD - Use service locator
-class UserScreen extends StatelessWidget {
-  const UserScreen({super.key});
-  
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => UserCubit(
-        userRepository: context.repository.user, // ✅ Correct!
-      ),
-      child: const UserView(),
-    );
-  }
+// ❌ BAD
+class FeatureCubit extends Cubit<FeatureState> {
+  FeatureCubit() : super(const FeatureInitial());
+
+  final _repository = getIt<FeatureRepository>(); // ❌ hidden dep
 }
 ```
 
-### ❌ Don't: Use getIt directly in Cubit
-```dart
-// ❌ BAD - Direct getIt usage in Cubit
-class UserCubit extends Cubit<UserState> {
-  UserCubit() : super(const UserInitial());
-  
-  final _userRepository = getIt<UserRepository>(); // ❌ Wrong!
-}
-```
+### ✅ Constructor injection with `@injectable`
 
-### ✅ Do: Inject dependencies through constructor
 ```dart
-// ✅ GOOD - Constructor injection
-class UserCubit extends Cubit<UserState> with CubitMixin<UserState> {
-  UserCubit({
-    required UserRepository userRepository,
-  }) : _userRepository = userRepository,
-       super(const UserInitial());
-  
-  final UserRepository _userRepository;
-}
-```
-
-### ❌ Don't: Use positional parameters
-```dart
-// ❌ BAD - Positional parameters
+// ✅ GOOD
+@injectable
 class FeatureCubit extends Cubit<FeatureState> {
   FeatureCubit(this._repository) : super(const FeatureInitial());
   final FeatureRepository _repository;
 }
 ```
 
-### ✅ Do: Use named parameters
+### ❌ Resolving cubit outside `create`
+
 ```dart
-// ✅ GOOD - Named parameters
-class FeatureCubit extends Cubit<FeatureState> {
-  FeatureCubit({
-    required FeatureRepository repository,
-  }) : _repository = repository,
-       super(const FeatureInitial());
-  
-  final FeatureRepository _repository;
+// ❌ BAD - resolved every build
+Widget build(BuildContext context) {
+  final cubit = getIt<FeatureCubit>();
+  return BlocProvider.value(value: cubit, child: ...);
 }
 ```
 
-### ❌ Don't: Use public mock classes
-```dart
-// ❌ BAD - Public mock class
-class MockUserRepository extends Mock implements UserRepository {} // ❌ Wrong!
+### ✅ Resolve inside `BlocProvider.create`
 
-void main() {
-  late MockUserRepository mockRepository;
-  // ...
-}
+```dart
+// ✅ GOOD
+BlocProvider(
+  create: (_) => getIt<FeatureCubit>()..loadFeature(),
+  child: const FeatureView(),
+);
 ```
 
-### ✅ Do: Use private mock classes
-```dart
-// ✅ GOOD - Private mock class
-class _MockUserRepository extends Mock implements UserRepository {} // ✅ Correct!
+### ❌ Positional constructor params
 
-void main() {
-  late _MockUserRepository mockRepository;
-  // ...
-}
+```dart
+// ❌ BAD
+FeatureCubit(FeatureRepository repository) : _repository = repository, super(...);
 ```
 
-### ❌ Don't: Use mutable state properties
+### ✅ Named or single-positional with field init
+
 ```dart
-// ❌ BAD - Mutable state property
-class FeatureLoaded extends FeatureState {
-  FeatureLoaded({required this.features});
-  List<Feature> features; // Not final
-}
+// ✅ GOOD (named — required by bloc_lint for multi-param)
+FeatureCubit({required FeatureRepository repository}) : _repository = repository, super(...);
+
+// ✅ GOOD (single-param positional with @injectable field)
+FeatureCubit(this._repository) : super(...);
 ```
 
-### ✅ Do: Make state properties final and immutable
-```dart
-// ✅ GOOD - Final and immutable
-class FeatureLoaded extends FeatureState {
-  const FeatureLoaded({required this.features});
-  final List<Feature> features;
-}
-```
+### ❌ Abstract state class
 
-### ❌ Don't: Use abstract class for states
 ```dart
-// ❌ BAD - Abstract class
+// ❌ BAD
 abstract class FeatureState extends Equatable {}
 ```
 
-### ✅ Do: Use sealed class for states
-```dart
-// ✅ GOOD - Sealed class
-sealed class FeatureState extends Equatable {}
-```
+### ✅ Sealed state class
 
-### ❌ Don't: Use emit after async gap without checking if closed
 ```dart
-// ❌ BAD - Using emit directly
-Future<void> loadFeature() async {
-  emit(const FeatureLoading());
-  final features = await _repository.getFeatures();
-  emit(FeatureLoaded(features: features)); // May throw if cubit is closed
+// ✅ GOOD
+sealed class FeatureState extends Equatable {
+  const FeatureState();
 }
 ```
 
-### ✅ Do: Use safeEmit with CubitMixin
+### ❌ Mutable state fields
+
 ```dart
-// ✅ GOOD - Using safeEmit with CubitMixin
-class FeatureCubit extends Cubit<FeatureState> with CubitMixin<FeatureState> {
-  Future<void> loadFeature() async {
-    safeEmit(const FeatureLoading());
-    final features = await _repository.getFeatures();
-    safeEmit(FeatureLoaded(features: features));
-  }
+// ❌ BAD
+class FeatureLoaded extends FeatureState {
+  FeatureLoaded({required this.features});
+  List<Feature> features; // not final
 }
 ```
 
+### ✅ Final fields, const constructor
+
+```dart
+// ✅ GOOD
+final class FeatureLoaded extends FeatureState {
+  const FeatureLoaded({required this.features});
+  final List<Feature> features;
+
+  @override
+  List<Object?> get props => [features];
+}
+```
+
+### ❌ Public mock classes
+
+```dart
+// ❌ BAD
+class MockFeatureRepository extends Mock implements FeatureRepository {}
+```
+
+### ✅ Private mock classes
+
+```dart
+// ✅ GOOD
+class _MockFeatureRepository extends Mock implements FeatureRepository {}
+```

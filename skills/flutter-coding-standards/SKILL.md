@@ -606,19 +606,19 @@ class ProductDetailScreen extends StatelessWidget {
 }
 ```
 
-## VLE UI Package Guidelines
+## UI Kit Package Guidelines
 
 ### Component Design
 
-- **DO** create reusable, themed components in vle_ui package.
+- **DO** create reusable, themed components in a dedicated UI kit package.
 ```dart
-// packages/vle_ui/lib/src/buttons/vle_button.dart
-class VleButton extends StatelessWidget {
-  const VleButton({
+// packages/ui_kit/lib/src/buttons/app_button.dart
+class AppButton extends StatelessWidget {
+  const AppButton({
     required this.text,
     required this.onPressed,
-    this.variant = VleButtonVariant.primary,
-    this.size = VleButtonSize.medium,
+    this.variant = AppButtonVariant.primary,
+    this.size = AppButtonSize.medium,
     this.isLoading = false,
     this.isFullWidth = false,
     super.key,
@@ -626,8 +626,8 @@ class VleButton extends StatelessWidget {
 
   final String text;
   final VoidCallback? onPressed;
-  final VleButtonVariant variant;
-  final VleButtonSize size;
+  final AppButtonVariant variant;
+  final AppButtonSize size;
   final bool isLoading;
   final bool isFullWidth;
 
@@ -657,57 +657,57 @@ class VleButton extends StatelessWidget {
   ButtonStyle _getButtonStyle(BuildContext context) {
     final theme = Theme.of(context);
     return switch (variant) {
-      VleButtonVariant.primary => VleButtonStyles.primary(theme),
-      VleButtonVariant.secondary => VleButtonStyles.secondary(theme),
-      VleButtonVariant.outlined => VleButtonStyles.outlined(theme),
+      AppButtonVariant.primary => AppButtonStyles.primary(theme),
+      AppButtonVariant.secondary => AppButtonStyles.secondary(theme),
+      AppButtonVariant.outlined => AppButtonStyles.outlined(theme),
     };
   }
 
   double _getLoadingSize() => switch (size) {
-    VleButtonSize.small => 16,
-    VleButtonSize.medium => 20,
-    VleButtonSize.large => 24,
+    AppButtonSize.small => 16,
+    AppButtonSize.medium => 20,
+    AppButtonSize.large => 24,
   };
 }
 
-enum VleButtonVariant { primary, secondary, outlined }
-enum VleButtonSize { small, medium, large }
+enum AppButtonVariant { primary, secondary, outlined }
+enum AppButtonSize { small, medium, large }
 ```
 
-### VLE UI Package Structure
+### UI Kit Package Structure
 
 ```
-packages/vle_ui/
+packages/ui_kit/
 └── lib/
     ├── src/
     │   ├── buttons/
-    │   │   ├── vle_button.dart
-    │   │   └── vle_icon_button.dart
+    │   │   ├── app_button.dart
+    │   │   └── app_icon_button.dart
     │   ├── cards/
-    │   │   └── vle_card.dart
+    │   │   └── app_card.dart
     │   ├── inputs/
-    │   │   ├── vle_text_field.dart
-    │   │   └── vle_dropdown.dart
+    │   │   ├── app_text_field.dart
+    │   │   └── app_dropdown.dart
     │   ├── theme/
-    │   │   ├── vle_colors.dart
-    │   │   ├── vle_text_styles.dart
-    │   │   └── vle_theme.dart
+    │   │   ├── app_colors.dart
+    │   │   ├── app_text_styles.dart
+    │   │   └── app_theme.dart
     │   └── widgets/
-    │       ├── vle_loading_indicator.dart
-    │       └── vle_error_view.dart
-    └── vle_ui.dart  // Export all components
+    │       ├── app_loading_indicator.dart
+    │       └── app_error_view.dart
+    └── ui_kit.dart  // Export all components
 ```
 
-- **DO** provide consistent theming across all VLE UI components.
+- **DO** provide consistent theming across all UI kit components.
 ```dart
-// packages/vle_ui/lib/src/theme/vle_theme.dart
-class VleTheme {
+// packages/ui_kit/lib/src/theme/app_theme.dart
+class AppTheme {
   static ThemeData light() {
     return ThemeData(
       useMaterial3: true,
-      colorScheme: VleColors.lightColorScheme,
-      textTheme: VleTextStyles.textTheme,
-      elevatedButtonTheme: VleButtonStyles.elevatedButtonTheme,
+      colorScheme: AppColors.lightColorScheme,
+      textTheme: AppTextStyles.textTheme,
+      elevatedButtonTheme: AppButtonStyles.elevatedButtonTheme,
       // ... other theme properties
     );
   }
@@ -715,8 +715,8 @@ class VleTheme {
   static ThemeData dark() {
     return ThemeData(
       useMaterial3: true,
-      colorScheme: VleColors.darkColorScheme,
-      textTheme: VleTextStyles.textTheme,
+      colorScheme: AppColors.darkColorScheme,
+      textTheme: AppTextStyles.textTheme,
       // ... other theme properties
     );
   }
@@ -910,7 +910,7 @@ export 'invoice_status_helper.dart';
 // import '../../screens/billing/views/billing_screen.dart';
 
 // ✅ GOOD - With barrel files, clean imports:
-// import 'package:learningos/screens/billing/billing.dart';
+// import 'package:app/screens/[feature]/[feature].dart';
 ```
 
 #### Route Configuration
@@ -919,7 +919,7 @@ Routes use `AppPageRoute` from `lib/components/route/`:
 
 ```dart
 // lib/screens/[feature]/route/[feature]_route.dart
-import 'package:learningos/components/route/app_page_route.dart';
+import 'package:app/components/route/app_page_route.dart';
 
 class FeatureRoute extends AppPageRoute<FeatureData, FeatureResult> {
   FeatureRoute({
@@ -1049,7 +1049,7 @@ class Overlay extends StatelessWidget {}
 - Split large widgets into smaller, focused widget classes
 - Keep widgets under 200 lines
 - Organize widgets by feature
-- Use VLE UI components for consistent design
+- Use UI kit components for consistent design
 
 ### DON'T
 - Use build methods (_buildXxx) for reusable widgets with parameters
@@ -1067,7 +1067,7 @@ class Overlay extends StatelessWidget {}
 - Small, focused widgets over large monolithic widgets
 - Named parameters for all widget constructors
 - Extracting to widget class if >5 lines or has parameters
-- VLE UI components over custom implementations
+- UI kit components over custom implementations
 
 ### AVOID
 - Build methods with parameters
@@ -1082,4 +1082,4 @@ class Overlay extends StatelessWidget {}
 - [Flutter Official Documentation](https://flutter.dev/docs)
 - [Flutter Performance Best Practices](https://flutter.dev/docs/perf/best-practices)
 - [Material Design 3](https://m3.material.io/)
-- See also: `@dart-coding-standards`, `@state-management`, `@clean-architecture`, `@testing-guidelines`, `@localization-guidelines`, `@project-structure`
+- See also: `@dart-coding-standards`, `@state-management`, `@clean-architecture`, `@testing-guidelines`, `@localization-guidelines`
