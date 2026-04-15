@@ -54,14 +54,14 @@ Follow the project's development workflow (see `${CLAUDE_PLUGIN_ROOT}/skills/dev
 - **FVM required**: Prefix all Flutter/Dart commands with `fvm` (e.g. `fvm flutter run`, `fvm dart run build_runner build -d`).
 - **Quality**: Format with `fvm dart run melos dart-format` (or `fvm dart format .`), run `fvm dart analyze`, use localization for user-visible strings, follow Clean Architecture.
 
-When a task matches one of the following, **delegate to the corresponding subagent**. Use [explicit invocation](https://cursor.com/docs/context/subagents#explicit-invocation): **`/name`** in the prompt (e.g. `/data-implementor add the new endpoint`) or natural mention (e.g. “Use the presentation subagent to implement this screen”).
+When a task matches one of the following, **delegate to the corresponding subagent**. Use [explicit invocation](https://cursor.com/docs/context/subagents#explicit-invocation): **`/name`** in the prompt (e.g. `/data-implementor add the new endpoint`) or natural mention (e.g. “Use the presentation-implementor subagent to implement this screen”).
 
 | Task | Invoke with | When to use |
 |------|-------------|-------------|
 | **Data layer (remote + local)** | `/data-implementor` | New or changed endpoints, API contracts, Retrofit APIs, request/response models, local persistence (Hive/SharedPreferences/SecureStorage), or any work in `packages/data`. (`${CLAUDE_PLUGIN_ROOT}/agents/data-implementor.md`) |
 | **Domain layer (repositories + use cases)** | `/domain-implementor` | New or changed repository interfaces/impls in `packages/domain`, use cases in `lib/use_case`, domain exceptions, or business-logic orchestration across data sources. (`${CLAUDE_PLUGIN_ROOT}/agents/domain-implementor.md`) |
-| **Presentation layer** | `/presentation` | Adding or changing screens, cubits, routes, or views in `lib/screens/`, `lib/widgets/`, or `lib/components/`. (`${CLAUDE_PLUGIN_ROOT}/agents/presentation.md`) |
+| **Presentation layer** | `/presentation-implementor` | Adding or changing screens, cubits, routes, or views in `lib/screens/`, `lib/widgets/`, or `lib/components/`. (`${CLAUDE_PLUGIN_ROOT}/agents/presentation-implementor.md`) |
 | **Tests** | `/test-writer` | **MANDATORY** after finishing code changes: add or update unit, widget, or integration tests for the changes. (`${CLAUDE_PLUGIN_ROOT}/agents/test-writer.md`) |
 | **Code review** | `/code-reviewer` | **MANDATORY** after finishing development (including unit tests): run format, analyze, bloc lint, and review all changed code. (`${CLAUDE_PLUGIN_ROOT}/agents/code-reviewer.md`) |
 
-**Do not ask the user which subagent to use.** Analyze the task yourself and either invoke the matching subagent or tell the user to run **`/name`** (e.g. “Run `/presentation` to implement this screen”). Decide based on the table above; never prompt the user to choose.
+**Do not ask the user which subagent to use.** Analyze the task yourself and either invoke the matching subagent or tell the user to run **`/name`** (e.g. “Run `/presentation-implementor` to implement this screen”). Decide based on the table above; never prompt the user to choose.
