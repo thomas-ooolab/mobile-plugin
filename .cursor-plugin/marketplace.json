@@ -1,0 +1,18 @@
+{
+  "name": "ooolab-mobile",
+  "owner": {
+    "name": "OOOLab"
+  },
+  "metadata": {
+    "description": "OOOLab mobile plugin marketplace — Flutter/Dart shared AI context",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "mobile-plugin",
+      "source": "./",
+      "description": "Shared rules, skills, agents, and commands for OOOLab Flutter/Dart projects",
+      "version": "0.1.0"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "mobile-plugin",
+  "displayName": "OOOLab Mobile Plugin",
+  "version": "0.1.0",
+  "description": "OOOLab shared AI rules, skills, agents, and commands for mobile (Flutter/Dart) projects",
+  "author": {
+    "name": "OOOLab"
+  },
+  "license": "UNLICENSED",
+  "keywords": [
+    "flutter",
+    "dart",
+    "mobile",
+    "clean-architecture",
+    "ooolab"
+  ]
+}

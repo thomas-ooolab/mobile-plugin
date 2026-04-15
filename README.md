@@ -86,6 +86,19 @@ More coming: Windsurf, Copilot, Cline.
 
 ## Install
 
+### As a Claude Code plugin (recommended)
+
+```
+/plugin marketplace add ooolab/mobile-plugin
+/plugin install mobile-plugin@ooolab-mobile
+```
+
+Skills, agents, and commands load natively. Namespaced as `/mobile-plugin:<name>`. No file generation, no sync — Claude Code reads `shared/` directly.
+
+### As a Cursor plugin
+
+Add this repo to Cursor via `.cursor-plugin/marketplace.json` (same shape as Claude Code).
+
 ### Run directly with npx (no install)
 
 ```bash

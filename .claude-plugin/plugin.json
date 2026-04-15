@@ -1,0 +1,22 @@
+{
+  "name": "mobile-plugin",
+  "version": "0.1.0",
+  "description": "OOOLab shared AI rules, skills, agents, and commands for mobile (Flutter/Dart) projects",
+  "author": {
+    "name": "OOOLab",
+    "url": "https://github.com/ooolab"
+  },
+  "homepage": "https://github.com/ooolab/mobile-plugin",
+  "repository": "https://github.com/ooolab/mobile-plugin",
+  "license": "UNLICENSED",
+  "keywords": [
+    "flutter",
+    "dart",
+    "mobile",
+    "clean-architecture",
+    "ooolab"
+  ],
+  "skills": "./shared/skills/",
+  "agents": "./shared/agents/",
+  "commands": "./shared/commands/"
+}
