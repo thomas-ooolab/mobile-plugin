@@ -1,4 +1,4 @@
-import { readdir, readFile } from 'fs/promises';
+import { readdir, readFile, stat } from 'fs/promises';
 import { join, dirname, basename, extname } from 'path';
 import { fileURLToPath } from 'url';
 import chalk from 'chalk';
@@ -12,48 +12,75 @@ export async function listShared(category) {
   const categories = category ? [category] : CATEGORIES;
 
   for (const cat of categories) {
-    const dir = join(SHARED_DIR, cat);
-    let files;
-    try {
-      files = await readdir(dir);
-    } catch {
-      continue;
-    }
-
-    const mdFiles = files.filter(f => extname(f) === '.md');
-    if (mdFiles.length === 0) continue;
+    const items = await loadSharedFiles(cat);
+    if (items.length === 0) continue;
 
     console.log(chalk.bold(`\n${cat.toUpperCase()}`));
-    for (const file of mdFiles) {
-      const content = await readFile(join(dir, file), 'utf-8');
-      const title = extractTitle(content) || basename(file, '.md');
-      const desc = extractDescription(content);
-      console.log(`  ${chalk.cyan(basename(file, '.md'))} — ${desc || title}`);
+    for (const item of items) {
+      const desc = item.frontmatter.description || extractTitle(item.raw) || item.name;
+      console.log(`  ${chalk.cyan(item.name)} — ${desc}`);
     }
   }
 }
 
 export async function loadSharedFiles(category) {
   const dir = join(SHARED_DIR, category);
-  let files;
+  let entries;
   try {
-    files = await readdir(dir);
+    entries = await readdir(dir);
   } catch {
     return [];
   }
 
   const results = [];
-  for (const file of files.filter(f => extname(f) === '.md')) {
-    const content = await readFile(join(dir, file), 'utf-8');
-    const { frontmatter, body } = parseFrontmatter(content);
-    results.push({
-      name: basename(file, '.md'),
-      filename: file,
-      frontmatter,
-      body,
-      raw: content,
-    });
+
+  for (const entry of entries) {
+    const entryPath = join(dir, entry);
+    const entryStat = await stat(entryPath);
+
+    if (entryStat.isDirectory()) {
+      // Subdir: look for SKILL.md as primary file
+      const skillPath = join(entryPath, 'SKILL.md');
+      try {
+        const content = await readFile(skillPath, 'utf-8');
+        const { frontmatter, body } = parseFrontmatter(content);
+
+        // Collect extra files (reference.md, etc.)
+        const extraFiles = {};
+        const subFiles = await readdir(entryPath);
+        for (const sf of subFiles) {
+          if (sf !== 'SKILL.md' && extname(sf) === '.md') {
+            extraFiles[basename(sf, '.md')] = await readFile(join(entryPath, sf), 'utf-8');
+          }
+        }
+
+        results.push({
+          name: entry,
+          filename: 'SKILL.md',
+          dir: entryPath,
+          frontmatter,
+          body,
+          raw: content,
+          extraFiles,
+        });
+      } catch {
+        // No SKILL.md in subdir, skip
+      }
+    } else if (extname(entry) === '.md') {
+      // Flat .md file (rules, agents, commands)
+      const content = await readFile(entryPath, 'utf-8');
+      const { frontmatter, body } = parseFrontmatter(content);
+      results.push({
+        name: basename(entry, '.md'),
+        filename: entry,
+        frontmatter,
+        body,
+        raw: content,
+        extraFiles: {},
+      });
+    }
   }
+
   return results;
 }
 

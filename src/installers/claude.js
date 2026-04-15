@@ -36,6 +36,14 @@ export async function syncClaude(projectDir, opts = {}) {
       skillContent,
       opts
     );
+    // Write extra files (reference.md, etc.) alongside the skill
+    for (const [extraName, extraContent] of Object.entries(skill.extraFiles || {})) {
+      await writeWithBackup(
+        join(claudeSkillsDir, `${skill.name}-${extraName}.md`),
+        extraContent,
+        opts
+      );
+    }
   }
 
   // Install commands as .claude/commands/ files
@@ -48,6 +56,33 @@ export async function syncClaude(projectDir, opts = {}) {
       cmd.raw,
       opts
     );
+  }
+
+  // Copy command scripts if they exist
+  await copyScripts(projectDir, opts);
+}
+
+async function copyScripts(projectDir, opts) {
+  const { getSharedDir } = await import('../utils.js');
+  const scriptsDir = join(getSharedDir(), 'commands', 'scripts');
+  const targetDir = join(projectDir, '.cursor', 'commands', 'scripts');
+
+  if (!await fs.pathExists(scriptsDir)) return;
+
+  const files = await fs.readdir(scriptsDir);
+  if (files.length === 0) return;
+
+  await fs.ensureDir(targetDir);
+  for (const file of files) {
+    const src = join(scriptsDir, file);
+    const dest = join(targetDir, file);
+    if (opts.dryRun) {
+      console.log(`  [dry-run] Would copy: ${dest}`);
+      continue;
+    }
+    await fs.copy(src, dest);
+    await fs.chmod(dest, 0o755);
+    console.log(`  copied: ${dest}`);
   }
 }
 
