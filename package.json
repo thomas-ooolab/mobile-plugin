@@ -1,0 +1,44 @@
+{
+  "name": "@ooolab/mobile-plugin",
+  "version": "0.1.0",
+  "description": "Shared AI skills, agents, rules, and commands across projects and AI tools",
+  "type": "module",
+  "bin": {
+    "ai-plugin": "./bin/ai-plugin.js"
+  },
+  "scripts": {
+    "lint": "eslint src/",
+    "test": "node --test src/**/*.test.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "shared/",
+    "templates/"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ooolab/mobile-plugin.git"
+  },
+  "keywords": [
+    "ai",
+    "claude",
+    "cursor",
+    "rules",
+    "skills",
+    "agents"
+  ],
+  "license": "UNLICENSED",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "handlebars": "^4.7.8",
+    "chalk": "^5.3.0",
+    "fs-extra": "^11.2.0",
+    "glob": "^10.4.0",
+    "yaml": "^2.4.0"
+  }
+}
