@@ -15,8 +15,5 @@
     "mobile",
     "clean-architecture",
     "ooolab"
-  ],
-  "skills": "./skills/",
-  "agents": "./agents/",
-  "commands": "./commands/"
+  ]
 }
