@@ -55,7 +55,7 @@ npx ai-plugin init --stack mobile
 {
   "extraKnownMarketplaces": {
     "ooolab": { "source": { "source": "github",
-                            "repo": "ooolab/mobile-plugin" } }
+                            "repo": "thomas-ooolab/mobile-plugin" } }
   },
   "enabledPlugins": { "mobile@ooolab": true }
 }
@@ -104,7 +104,7 @@ More coming: Windsurf, Copilot, Cline.
 ### As a Claude Code plugin (recommended — no CLI needed)
 
 ```
-/plugin marketplace add ooolab/mobile-plugin
+/plugin marketplace add thomas-ooolab/mobile-plugin
 /plugin install mobile@ooolab
 ```
 
@@ -113,7 +113,7 @@ Skills, agents, commands, and hooks load natively. Claude Code reads `plugins/mo
 ### As a Cursor plugin (no CLI needed)
 
 ```
-/plugin marketplace add ooolab/mobile-plugin
+/plugin marketplace add thomas-ooolab/mobile-plugin
 /plugin install mobile@ooolab
 ```
 
@@ -152,10 +152,10 @@ Output:
 
 ```
 Initializing AI plugin (stack: mobile)...
-  registered marketplace: ooolab (ooolab/mobile-plugin)
+  registered marketplace: ooolab (thomas-ooolab/mobile-plugin)
   enabled plugin: mobile@ooolab
 ✓ claude configured
-  registered marketplace: ooolab (ooolab/mobile-plugin)
+  registered marketplace: ooolab (thomas-ooolab/mobile-plugin)
   enabled plugin: mobile@ooolab
 ✓ cursor configured
 
