@@ -27,11 +27,31 @@ Reject upward dependencies (e.g. domain importing `lib/screens`).
 
 ```
 packages/domain/lib/src/<domain>/
-├── <domain>_repository.dart          # abstract interface
-├── <domain>_repository_impl.dart     # implementation
-├── <domain>_module.dart              # DI module (if external bindings needed)
+├── <domain>.dart                     # Barrel — exports interface + exceptions
+├── <domain>_repository.dart          # abstract interface only
 └── exception/
-    └── exception.dart                # domain exceptions
+    ├── exception.dart                # Barrel — exports all exception classes
+    └── <domain>_exception.dart       # domain exceptions
+```
+
+> Implementation lives in `packages/data/lib/src/repository/` — see `@data-guidelines`.
+
+### Barrel Contents
+
+```dart
+// <domain>.dart
+export '<domain>_repository.dart';
+export 'exception/exception.dart';
+
+// exception/exception.dart
+export '<domain>_exception.dart';
+```
+
+### Import
+
+```dart
+// Consume from other packages:
+import 'package:domain/<domain>/<domain>.dart';
 ```
 
 ### Interface
@@ -48,57 +68,33 @@ abstract interface class AuthenticationRepository {
 }
 ```
 
-### Implementation
-
-- `@Injectable(as: <Domain>Repository)` on `final class <Domain>RepositoryImpl`
-- Inject only data source interfaces from `packages/data` via named constructor params
-- Catch `DataSourceException` → translate to domain exceptions (never leak upward)
-- Coordinate remote + local for caching/persistence
-- No business rules — data access only
-
-```dart
-@Injectable(as: AuthenticationRepository)
-final class AuthenticationRepositoryImpl implements AuthenticationRepository {
-  AuthenticationRepositoryImpl({
-    required AuthenticationRemoteDataSource authenticationRemoteDataSource,
-    required AuthenticationLocalDataSource authenticationLocalDataSource,
-  })  : _authenticationRemoteDataSource = authenticationRemoteDataSource,
-        _authenticationLocalDataSource = authenticationLocalDataSource;
-
-  final AuthenticationRemoteDataSource _authenticationRemoteDataSource;
-  final AuthenticationLocalDataSource _authenticationLocalDataSource;
-
-  @override
-  Future<void> login({required String email, required String password}) async {
-    try {
-      final tokens = await _authenticationRemoteDataSource.login(
-        email: email,
-        password: password,
-      );
-      await _authenticationLocalDataSource.save(
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken,
-        tokenType: tokens.tokenType,
-      );
-    } on DataSourceException catch (e) {
-      if (e.error?.name == ErrorName.unauthorized) {
-        throw IncorrectCredentialException('Incorrect credential error');
-      }
-      throw LoginException(e.toString());
-    }
-  }
-}
-```
-
 ## Use Case Layer (`lib/use_case/<domain>/<feature>/`)
 
 ### Folder Structure
 
 ```
-lib/use_case/<domain>/<feature>/
-├── <use_case_name>_uc.dart        # abstract interface
-├── <use_case_name>_uc_impl.dart   # implementation
-└── <feature>.dart                 # barrel file
+lib/use_case/<domain>/
+├── <domain>.dart                  # Barrel — exports all feature barrels
+└── <feature>/
+    ├── <use_case_name>_uc.dart        # abstract interface
+    ├── <use_case_name>_uc_impl.dart   # implementation
+    └── <feature>.dart                 # Barrel
+```
+
+### Barrel Contents
+
+```dart
+// use_case/<domain>/<domain>.dart
+export '<feature>/<feature>.dart';
+
+// use_case/<domain>/<feature>/<feature>.dart
+export '<use_case_name>_uc.dart';  // interface only — never export impl
+```
+
+### Import
+
+```dart
+import 'package:app/use_case/<domain>/<domain>.dart';
 ```
 
 ### Interface

@@ -16,35 +16,74 @@ packages/data/lib/src/
 │   ├── di.dart                          # Barrel
 │   ├── data_injection.dart              # @InjectableInit.microPackage()
 │   └── data_injection.config.dart       # Generated
-├── remote/
-│   ├── remote.dart                      # Barrel — export interfaces only
-│   ├── api/
-│   │   ├── api.dart                     # Barrel — exports all feature barrels
-│   │   └── <feature>/
-│   │       ├── <feature>_api.dart       # Retrofit API
-│   │       └── <feature>.dart           # Barrel
-│   ├── datasource/
-│   │   ├── datasource.dart              # Barrel — exports all feature barrels
-│   │   └── <feature>/
-│   │       ├── <feature>_remote_datasource.dart       # Interface
-│   │       ├── <feature>_remote_datasource_impl.dart  # Implementation
-│   │       ├── model/                                  # Request/Response DTOs
-│   │       │   ├── <model_name>.dart
-│   │       │   └── model.dart                          # Barrel
-│   │       └── <feature>.dart                          # Barrel
-│   └── network/                         # Dio, interceptors
-└── local/
-    ├── local.dart                       # Barrel — export interfaces only
-    ├── datasource/
-    │   ├── datasource.dart              # Barrel — exports all feature barrels
-    │   └── <feature>/
-    │       ├── <feature>_local_datasource.dart       # Interface
-    │       ├── <feature>_local_datasource_impl.dart  # Implementation
-    │       └── <feature>.dart                         # Barrel
-    └── model/                           # Local storage models
+├── datasource/
+│   ├── remote/
+│   │   ├── remote.dart                      # Barrel — export interfaces only
+│   │   ├── api/
+│   │   │   ├── api.dart                     # Barrel — exports all feature barrels
+│   │   │   └── <feature>/
+│   │   │       ├── <feature>_api.dart       # Retrofit API
+│   │   │       └── <feature>.dart           # Barrel
+│   │   ├── datasource/
+│   │   │   ├── datasource.dart              # Barrel — exports all feature barrels
+│   │   │   └── <feature>/
+│   │   │       ├── <feature>_remote_datasource.dart       # Interface
+│   │   │       ├── <feature>_remote_datasource_impl.dart  # Implementation
+│   │   │       ├── model/                                  # Request/Response DTOs
+│   │   │       │   ├── <model_name>.dart
+│   │   │       │   └── model.dart                          # Barrel
+│   │   │       └── <feature>.dart                          # Barrel
+│   │   └── network/                         # Dio, interceptors
+│   └── local/
+│       ├── local.dart                       # Barrel — export interfaces only
+│       ├── datasource/
+│       │   ├── datasource.dart              # Barrel — exports all feature barrels
+│       │   └── <feature>/
+│       │       ├── <feature>_local_datasource.dart       # Interface
+│       │       ├── <feature>_local_datasource_impl.dart  # Implementation
+│       │       └── <feature>.dart                         # Barrel
+│       └── model/                           # Local storage models
+└── repository/
+    ├── repository.dart                  # Barrel — exports all domain barrels
+    └── <domain>/
+        ├── <domain>_repository_impl.dart   # Implementation
+        └── <domain>.dart                   # Barrel
 ```
 
-## API Layer (`lib/src/remote/api/<feature>/`)
+## Barrel Contents & Imports
+
+```dart
+// datasource/remote/remote.dart — interfaces only
+export 'datasource/datasource.dart';
+
+// datasource/remote/datasource/datasource.dart
+export '<feature>/<feature>.dart';
+
+// datasource/remote/datasource/<feature>/<feature>.dart
+export '<feature>_remote_datasource.dart';  // interface only
+
+// datasource/remote/api/api.dart
+export '<feature>/<feature>.dart';
+
+// datasource/remote/api/<feature>/<feature>.dart
+export '<feature>_api.dart';
+
+// repository/repository.dart
+export '<domain>/<domain>.dart';
+
+// repository/<domain>/<domain>.dart
+export '<domain>_repository_impl.dart';
+```
+
+```dart
+// Consume remote datasource interface:
+import 'package:data/src/datasource/remote/remote.dart';
+
+// Consume repository impl (internal DI only):
+import 'package:data/src/repository/repository.dart';
+```
+
+## API Layer (`lib/src/datasource/remote/api/<feature>/`)
 
 - Barrel: `<feature>.dart` — export `<feature>_api.dart`
 - One Retrofit API per feature: `<feature>_api.dart`
@@ -67,7 +106,7 @@ abstract interface class FeatureApi {
 }
 ```
 
-## Remote Data Source Layer (`lib/src/remote/datasource/<feature>/`)
+## Remote Data Source Layer (`lib/src/datasource/remote/datasource/<feature>/`)
 
 **Interface** — return entity/domain types only; no Dio/Retrofit types:
 
@@ -104,7 +143,7 @@ final class FeatureRemoteDataSourceImpl implements FeatureRemoteDataSource {
 - All errors → `DataSourceException.from(e)`
 - Map response to entity/model — no raw JSON upward
 
-## Local Data Source Layer (`lib/src/local/datasource/<feature>/`)
+## Local Data Source Layer (`lib/src/datasource/local/datasource/<feature>/`)
 
 **Interface:**
 
@@ -149,7 +188,7 @@ final class FeatureLocalDataSourceImpl implements FeatureLocalDataSource {
 - Handle serialization/deserialization inside impl
 - Throw `Exception` on storage failure — never swallow
 
-## Models (`lib/src/remote/datasource/<feature>/model/`)
+## Models (`lib/src/datasource/remote/datasource/<feature>/model/`)
 
 Request/response DTOs:
 
@@ -172,6 +211,53 @@ class FeatureModel {
 - `@JsonSerializable()` + `part 'feature_model.g.dart';`
 - `fromJson` for responses, `toJson()` for requests
 - Keep in data package — domain entities stay in `entity`
+
+## Repository Layer (`lib/src/repository/<domain>/`)
+
+Repository interfaces are defined in `packages/domain` — only implementations live here.
+
+- `@Injectable(as: <Domain>Repository)` on `final class <Domain>RepositoryImpl`
+- Inject only data source interfaces (remote/local) via named constructor params
+- Catch `DataSourceException` → translate to domain exceptions (never leak upward)
+- Coordinate remote + local for caching/persistence
+- No business rules — data access only
+
+```dart
+@Injectable(as: AuthenticationRepository)
+final class AuthenticationRepositoryImpl implements AuthenticationRepository {
+  AuthenticationRepositoryImpl({
+    required AuthenticationRemoteDataSource authenticationRemoteDataSource,
+    required AuthenticationLocalDataSource authenticationLocalDataSource,
+  })  : _authenticationRemoteDataSource = authenticationRemoteDataSource,
+        _authenticationLocalDataSource = authenticationLocalDataSource;
+
+  final AuthenticationRemoteDataSource _authenticationRemoteDataSource;
+  final AuthenticationLocalDataSource _authenticationLocalDataSource;
+
+  @override
+  Future<void> login({required String email, required String password}) async {
+    try {
+      final tokens = await _authenticationRemoteDataSource.login(
+        email: email,
+        password: password,
+      );
+      await _authenticationLocalDataSource.save(
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        tokenType: tokens.tokenType,
+      );
+    } on DataSourceException catch (e) {
+      if (e.error?.name == ErrorName.unauthorized) {
+        throw IncorrectCredentialException('Incorrect credential error');
+      }
+      throw LoginException(e.toString());
+    }
+  }
+}
+```
+
+**Rules:**
+- Barrel `<domain>.dart` exports impl only — interface stays in domain package
 
 ## Dependency Injection
 

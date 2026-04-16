@@ -22,6 +22,7 @@ All features follow a consistent directory structure with barrel files for clean
 lib/screens/[feature_name]/
 ├── [feature_name].dart           # Barrel file - exports all public APIs
 ├── cubit/                        # State management (see @state-management)
+│   ├── cubit.dart                # Barrel — exports cubits and states
 │   ├── [feature]_cubit.dart      # Main Cubit for feature
 │   └── [feature]_state.dart      # State definitions
 ├── views/                        # Screen implementations
@@ -55,6 +56,7 @@ lib/screens/[feature_name]/
 ├── [sub_feature_1]/              # Sub-feature follows same structure
 │   ├── [sub_feature_1].dart      # Barrel file
 │   ├── cubit/
+│   │   ├── cubit.dart
 │   │   ├── [name]_cubit.dart
 │   │   └── [name]_state.dart
 │   ├── views/
@@ -117,6 +119,7 @@ Features may have multiple Cubits for different concerns:
 ```
 lib/screens/[feature_name]/
 ├── cubit/
+│   ├── cubit.dart                    # Barrel — exports all cubits and states
 │   ├── [feature]_cubit.dart          # Main feature logic
 │   ├── [feature]_state.dart
 │   ├── [sub_concern]_cubit.dart      # Specific concern (e.g., avatar, filter)
@@ -184,6 +187,10 @@ export 'route/route.dart';                    // Export routes
 export 'models/models.dart' show BillingDetailData;  // Selective export
 export 'route/route.dart';
 
+// ✅ GOOD - lib/screens/billing/cubit/cubit.dart
+export 'billing_cubit.dart';
+export 'billing_state.dart';
+
 // ✅ GOOD - lib/screens/billing/views/views.dart
 export 'billing_screen.dart';
 export 'invoice_item.dart';
@@ -194,6 +201,7 @@ export 'invoice_status_helper.dart';
 
 // ❌ BAD - No barrel file
 // Forces consumers to know internal structure:
+// import '../../screens/billing/cubit/billing_cubit.dart';
 // import '../../screens/billing/views/billing_screen.dart';
 
 // ✅ GOOD - With barrel files, clean imports:
