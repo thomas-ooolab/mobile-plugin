@@ -21,7 +21,7 @@
 
 ---
 
-Internal plugin that registers the OOOLab marketplace in Claude Code and Cursor, enabling native plugin loading by stack. No file copying — skills, agents, commands, and hooks load directly from the plugin source.
+Internal plugin that registers the OOOLab marketplace in Claude Code, enabling native plugin loading by stack. No file copying — skills, agents, commands, and hooks load directly from the plugin source.
 
 ## Before / After
 
@@ -61,7 +61,7 @@ npx ooolab-plugin init --stack mobile
 }
 ```
 
-Claude Code and Cursor load skills, agents, commands, and hooks natively. Always current — no sync needed.
+Claude Code loads skills, agents, commands, and hooks natively. Always current — no sync needed.
 
 </td>
 </tr>
@@ -95,9 +95,8 @@ Content lives in `plugins/<stack>/`. Each stack is an independent plugin with it
 | Tool | Settings file | What gets registered |
 |------|--------------|----------------------|
 | **Claude Code** | `.claude/settings.json` | `extraKnownMarketplaces` + `enabledPlugins` |
-| **Cursor** | `.cursor/settings.json` | `extraKnownMarketplaces` + `enabledPlugins` |
 
-More coming: Windsurf, Copilot, Cline.
+More coming: Cursor, Windsurf, Copilot, Cline.
 
 ## Install
 
@@ -109,13 +108,6 @@ More coming: Windsurf, Copilot, Cline.
 ```
 
 Skills, agents, commands, and hooks load natively. Claude Code reads `plugins/mobile/` directly from the repo.
-
-### As a Cursor plugin (no CLI needed)
-
-```
-/plugin marketplace add thomas-ooolab/ooolab-plugin
-/plugin install mobile@ooolab
-```
 
 ### Via CLI — register marketplace in project settings
 
@@ -145,7 +137,6 @@ npx ooolab-plugin init --stack mobile --dry-run
 
 # Single tool
 npx ooolab-plugin init --stack mobile -t claude
-npx ooolab-plugin init --stack mobile -t cursor
 ```
 
 Output:
@@ -155,14 +146,11 @@ Initializing AI plugin (stack: mobile)...
   registered marketplace: ooolab (thomas-ooolab/ooolab-plugin)
   enabled plugin: mobile@ooolab
 ✓ claude configured
-  registered marketplace: ooolab (thomas-ooolab/ooolab-plugin)
-  enabled plugin: mobile@ooolab
-✓ cursor configured
 
 Done! AI configs installed.
 ```
 
-Writes `.ooolab-plugin.json` (tracks stack + configured tools) and updates `.claude/settings.json` / `.cursor/settings.json`.
+Writes `.ooolab-plugin.json` (tracks stack + configured tools) and updates `.claude/settings.json`.
 
 ### `sync` — Re-register (idempotent)
 
@@ -170,7 +158,6 @@ Writes `.ooolab-plugin.json` (tracks stack + configured tools) and updates `.cla
 npx ooolab-plugin sync                        # stack from .ooolab-plugin.json
 npx ooolab-plugin sync --stack mobile         # explicit stack
 npx ooolab-plugin sync --dry-run              # preview only
-npx ooolab-plugin sync --stack mobile -t claude
 ```
 
 Since plugins load live from source, sync is mainly useful after switching stacks or adding tools.
@@ -228,8 +215,6 @@ plugins/
   mobile/                   # Flutter/Dart stack
     .claude-plugin/
       plugin.json           # Claude Code plugin manifest
-    .cursor-plugin/
-      plugin.json           # Cursor plugin manifest
     rules/                  # Coding standards (.md)
     skills/                 # Skill folders (each with SKILL.md)
     agents/                 # Agent definitions (.md)
@@ -255,27 +240,14 @@ alwaysApply: true          # Optional: auto-apply (Cursor)
 Content here. Markdown supported.
 ```
 
-### Hooks (Claude Code)
-
-The mobile plugin ships with two hooks:
-
-| Event | Action |
-|-------|--------|
-| `PostToolUse` on `Write\|Edit` | Auto-runs `dart format` on edited `.dart` files (if `dart` available) |
-| `SessionStart` | Prints "OOOLab mobile plugin loaded" on session start |
-
-Hook config: `plugins/mobile/hooks/hooks.json`  
-Scripts: `plugins/mobile/scripts/dart-format.sh`
-
 ### How It Works
 
 ```
 npx ooolab-plugin init --stack mobile
         │
-        ├── .claude/settings.json ← extraKnownMarketplaces + enabledPlugins
-        └── .cursor/settings.json ← extraKnownMarketplaces + enabledPlugins
+        └── .claude/settings.json ← extraKnownMarketplaces + enabledPlugins
 
-Claude Code / Cursor load plugins natively:
+Claude Code loads plugins natively:
   plugins/mobile/{skills,agents,commands,hooks}/  ← loaded directly from repo
 ```
 
@@ -297,87 +269,8 @@ Claude Code / Cursor load plugins natively:
 
 1. Create `plugins/<stack>/` with `rules/`, `skills/`, `agents/`, `commands/` subdirs
 2. Add `plugins/<stack>/.claude-plugin/plugin.json`
-3. Add `plugins/<stack>/.cursor-plugin/plugin.json`
-4. Register in `.claude-plugin/marketplace.json` and `.cursor-plugin/marketplace.json`
-5. Add skills, agents, rules, commands
-
-## Adding a New AI Tool
-
-<details>
-<summary><strong>Create an installer in <code>src/installers/</code></strong></summary>
-
-```js
-// src/installers/windsurf.js
-import fs from 'fs-extra';
-import { join } from 'path';
-import chalk from 'chalk';
-import { getMarketplaceConfig } from '../marketplace.js';
-
-export async function syncWindsurf(projectDir, opts = {}) {
-  const stack = opts.stack || 'mobile';
-  const { marketplaceName, githubRepo } = await getMarketplaceConfig();
-  const settingsPath = join(projectDir, '.windsurf', 'settings.json');
-
-  let settings = {};
-  if (await fs.pathExists(settingsPath)) {
-    settings = await fs.readJson(settingsPath);
-  }
-
-  settings.extraKnownMarketplaces = settings.extraKnownMarketplaces || {};
-  settings.extraKnownMarketplaces[marketplaceName] = {
-    source: { source: 'github', repo: githubRepo },
-  };
-  settings.enabledPlugins = settings.enabledPlugins || {};
-  settings.enabledPlugins[`${stack}@${marketplaceName}`] = true;
-
-  await fs.ensureDir(join(projectDir, '.windsurf'));
-  await fs.writeJson(settingsPath, settings, { spaces: 2 });
-  console.log(chalk.green(`  registered marketplace: ${marketplaceName}`));
-}
-```
-
-Register in `src/cli.js`:
-
-```js
-import { syncWindsurf } from './installers/windsurf.js';
-
-const TARGETS = {
-  claude: syncClaude,
-  cursor: syncCursor,
-  windsurf: syncWindsurf,  // add here
-};
-```
-
-</details>
-
-## CI Integration
-
-<details>
-<summary><strong>Auto-register via GitHub Actions</strong></summary>
-
-```yaml
-# .github/workflows/register-ooolab-plugin.yml
-name: Register AI Plugin
-on:
-  workflow_dispatch:
-  push:
-    paths:
-      - '.ooolab-plugin.json'
-
-jobs:
-  register:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: npm install
-      - run: npx ooolab-plugin sync --stack mobile
-      - uses: peter-evans/create-pull-request@v6
-        with:
-          title: 'chore: register AI plugin marketplace'
-          branch: chore/register-ooolab-plugin
-```
-
-</details>
+3. Register in `.claude-plugin/marketplace.json`
+4. Add skills, agents, rules, commands
 
 ## Notes
 
