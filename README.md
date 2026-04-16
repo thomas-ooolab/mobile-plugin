@@ -66,10 +66,10 @@ One command. Every project. Always current.
 
 ```
 ┌──────────────────────────────────────────┐
-│  SHARED RULES          ████████ 3 rules  │
-│  SHARED SKILLS         ████████ 2 skills │
-│  SHARED AGENTS         ████████ 1 agent  │
-│  SHARED COMMANDS       ████████ 1 cmd    │
+│  SHARED RULES          ████████ 1 rule   │
+│  SHARED SKILLS         ████████ 13 skills│
+│  SHARED AGENTS         ████████ 5 agents │
+│  SHARED COMMANDS       ████████ 3 cmds   │
 │  SUPPORTED TOOLS       ████████ 2 tools  │
 │  COPY-PASTE NEEDED     ░░░░░░░░ 0        │
 └──────────────────────────────────────────┘
@@ -175,19 +175,34 @@ npx ai-plugin sync -t claude   # one tool
 npx ai-plugin list
 
 RULES
-  general       — Core coding standards for all OOOLab projects
-  react-native  — React Native development standards
-  typescript    — TypeScript coding standards and best practices
+  development-workflow     — Development workflow (FVM, git, quality) and subagent delegation
 
 SKILLS
-  code-review   — Structured code review checklist and process
-  commit        — Generate conventional commit messages from staged changes
+  bash-scripting-standards — Bash syntax, error handling, security, ShellCheck compliance
+  clean-architecture       — Layer separation, dependency rules, repositories, use cases
+  dart-coding-standards    — Naming, syntax, null safety, async, modern language features
+  data-guidelines          — Retrofit API, remote/local data sources, models, DI (packages/data)
+  dependency-injection-guidelines — get_it + injectable: annotations, modules, test overrides
+  development-workflow     — Git branching, feature development, CI/CD, code quality
+  domain-guidelines        — Repository interfaces, use cases, domain exceptions (packages/domain)
+  flutter-coding-standards — Widget architecture, composition rules, performance patterns
+  git                      — Commits, branches, merges, rebases, conflict resolution, recovery
+  presentation-guidelines  — Screens, cubits, routes, barrel files (lib/screens/)
+  ruby-coding-standards    — Fastlane lane/helper design, env vars, shell safety, CI patterns
+  state-management         — Cubit/BLoC with flutter_bloc, @freezed states, DataLoadStatus
+  testing-guidelines       — Unit, widget, integration tests with bloc_test and mocktail
 
 AGENTS
-  reviewer      — Automated code reviewer for quality, security, consistency
+  code-reviewer            — Proactive Dart/Flutter + Clean Architecture code reviewer
+  data-implementor         — Retrofit APIs, data sources, models, DI (packages/data)
+  domain-implementor       — Repository interfaces, use cases, DI wiring (packages/domain)
+  presentation-implementor — Screens, cubits, routes, views (lib/screens/)
+  test-writer              — Write/update test suites after feature changes
 
 COMMANDS
-  deploy        — Guide through deployment process with pre-flight checks
+  mr                       — Create GitLab MR with conventional title + ticket ID
+  push                     — Stage, commit (conventional message), push to origin
+  specs                    — Accept ticket ID + requirements, run full 5-step dev workflow
 ```
 
 ## Shared Content
