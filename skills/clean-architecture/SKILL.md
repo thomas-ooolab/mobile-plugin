@@ -110,7 +110,7 @@ packages/
 - `lib/core/state_management/` — State management utilities (`DataLoadStatus`)
 - `packages/data/lib/src/remote/network/` — Network config
 - `packages/entity/` — All domain models
-
+@
 ## Tools & Commands
 
 > This project uses FVM. Always prefix Flutter/Dart commands with `fvm`.
