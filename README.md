@@ -5,13 +5,14 @@
 <h1 align="center">@ooolab/mobile-plugin</h1>
 
 <p align="center">
-  <strong>one source of truth for AI rules across every project and every tool</strong>
+  <strong>one source of truth for AI rules across every project, every tool, every stack</strong>
 </p>
 
 <p align="center">
   <a href="#before--after">Before/After</a> •
   <a href="#install">Install</a> •
   <a href="#usage">Usage</a> •
+  <a href="#stacks">Stacks</a> •
   <a href="#shared-content">Content</a> •
   <a href="#supported-tools">Tools</a> •
   <a href="#adding-new-content">Contribute</a> •
@@ -20,7 +21,7 @@
 
 ---
 
-Internal CLI plugin that distributes shared **rules**, **skills**, **agents**, and **commands** to Claude Code and Cursor from a single source. Define once at the repo root (`rules/`, `skills/`, `agents/`, `commands/`), install as plugin or run `sync`, every project gets the same AI context — no copy-paste, no drift.
+Internal plugin that registers the OOOLab marketplace in Claude Code and Cursor, enabling native plugin loading by stack. No file copying — skills, agents, commands, and hooks load directly from the plugin source.
 
 ## Before / After
 
@@ -31,11 +32,11 @@ Internal CLI plugin that distributes shared **rules**, **skills**, **agents**, a
 ### 😵 Without plugin
 
 ```
-project-a/.cursorrules        ← v3, outdated
 project-a/CLAUDE.md           ← hand-written, incomplete
-project-b/.cursorrules        ← v5, different from A
+project-a/.cursorrules         ← v3, outdated
 project-b/CLAUDE.md           ← missing entirely
-project-c/.cursor/rules/      ← someone's personal copy
+project-b/.cursorrules         ← v5, different from A
+project-c/.cursor/rules/       ← someone's personal copy
 ```
 
 Rules drift. New projects start from scratch. Onboarding is "copy from that other repo."
@@ -46,19 +47,21 @@ Rules drift. New projects start from scratch. Onboarding is "copy from that othe
 ### ✅ With plugin
 
 ```bash
-npx @ooolab/mobile-plugin init
+npx ai-plugin init --stack mobile
 ```
 
-```
-project-a/CLAUDE.md           ← synced ✓
-project-a/.cursorrules         ← synced ✓
-project-b/CLAUDE.md           ← synced ✓
-project-b/.cursorrules         ← synced ✓
-project-c/CLAUDE.md           ← synced ✓
-project-c/.cursorrules         ← synced ✓
+```jsonc
+// .claude/settings.json — auto-written
+{
+  "extraKnownMarketplaces": {
+    "ooolab": { "source": { "source": "github",
+                            "repo": "ooolab/mobile-plugin" } }
+  },
+  "enabledPlugins": { "mobile@ooolab": true }
+}
 ```
 
-One command. Every project. Always current.
+Claude Code and Cursor load skills, agents, commands, and hooks natively. Always current — no sync needed.
 
 </td>
 </tr>
@@ -66,113 +69,122 @@ One command. Every project. Always current.
 
 ```
 ┌──────────────────────────────────────────┐
-│  SHARED RULES          ████████ 1 rule   │
-│  SHARED SKILLS         ████████ 13 skills│
-│  SHARED AGENTS         ████████ 5 agents │
-│  SHARED COMMANDS       ████████ 3 cmds   │
-│  SUPPORTED TOOLS       ████████ 2 tools  │
-│  COPY-PASTE NEEDED     ░░░░░░░░ 0        │
+│  STACKS            ████████ mobile       │
+│                    ░░░░░░░░ be (soon)    │
+│                    ░░░░░░░░ fe (soon)    │
+│  SHARED SKILLS     ████████ 13 skills   │
+│  SHARED AGENTS     ████████ 5 agents    │
+│  SHARED COMMANDS   ████████ 3 cmds      │
+│  SUPPORTED TOOLS   ████████ 2 tools     │
+│  FILES TO COPY     ░░░░░░░░ 0           │
 └──────────────────────────────────────────┘
 ```
 
+## Stacks
+
+Content lives in `plugins/<stack>/`. Each stack is an independent plugin with its own rules, skills, agents, commands, and hooks.
+
+| Stack | Status | Contents |
+|-------|--------|----------|
+| `mobile` | ✅ Active | Flutter/Dart — clean architecture, BLoC, Fastlane |
+| `be` | 🔜 Soon | Backend — TBD |
+| `fe` | 🔜 Soon | Frontend — TBD |
+
 ## Supported Tools
 
-| Tool | Generated Files | Format |
-|------|----------------|--------|
-| **Claude Code** | `CLAUDE.md`, `.claude/skills/*.md`, `.claude/commands/*.md` | Markdown |
-| **Cursor** | `.cursorrules`, `.cursor/rules/*.mdc` | MDC |
+| Tool | Settings file | What gets registered |
+|------|--------------|----------------------|
+| **Claude Code** | `.claude/settings.json` | `extraKnownMarketplaces` + `enabledPlugins` |
+| **Cursor** | `.cursor/settings.json` | `extraKnownMarketplaces` + `enabledPlugins` |
 
 More coming: Windsurf, Copilot, Cline.
 
 ## Install
 
-### As a Claude Code plugin (recommended)
+### As a Claude Code plugin (recommended — no CLI needed)
 
 ```
 /plugin marketplace add ooolab/mobile-plugin
-/plugin install mobile-plugin@ooolab-mobile
+/plugin install mobile@ooolab
 ```
 
-Skills, agents, and commands load natively. Namespaced as `/mobile-plugin:<name>`. No file generation, no sync — Claude Code reads `skills/`, `agents/`, `commands/` directly.
+Skills, agents, commands, and hooks load natively. Claude Code reads `plugins/mobile/` directly from the repo.
 
-### As a Cursor plugin
+### As a Cursor plugin (no CLI needed)
 
-Add this repo to Cursor via `.cursor-plugin/marketplace.json` (same shape as Claude Code).
-
-### Run directly with npx (no install)
-
-```bash
-# From GitHub — run anywhere, no install needed
-npx github:thomas-ooolab/mobile-plugin init
-npx github:thomas-ooolab/mobile-plugin sync
-npx github:thomas-ooolab/mobile-plugin list
+```
+/plugin marketplace add ooolab/mobile-plugin
+/plugin install mobile@ooolab
 ```
 
-### Or install as devDependency
+### Via CLI — register marketplace in project settings
 
 ```bash
+# Run directly from GitHub, no install needed
+npx github:thomas-ooolab/mobile-plugin init --stack mobile
+
+# Or install as devDependency
 npm install --save-dev github:thomas-ooolab/mobile-plugin
+npx ai-plugin init --stack mobile
 
-# Then use locally
-npx ai-plugin init
-npx ai-plugin sync
-npx ai-plugin list
-```
-
-### Or install globally
-
-```bash
+# Or install globally
 npm install -g github:thomas-ooolab/mobile-plugin
-
-# Then use anywhere
-ai-plugin init
-ai-plugin sync
+ai-plugin init --stack mobile
 ```
 
 ## Usage
 
-### `init` — Set up a project
+### `init` — Register marketplace in project
 
 ```bash
-# Both Claude + Cursor
-npx ai-plugin init
+# Mobile stack, both Claude + Cursor
+npx ai-plugin init --stack mobile
+
+# Preview only
+npx ai-plugin init --stack mobile --dry-run
 
 # Single tool
-npx ai-plugin init -t claude
-npx ai-plugin init -t cursor
+npx ai-plugin init --stack mobile -t claude
+npx ai-plugin init --stack mobile -t cursor
 ```
 
 Output:
 
 ```
-Initializing AI plugin...
-  wrote: CLAUDE.md
-  wrote: .claude/skills/code-review.md
-  wrote: .claude/skills/commit.md
-  wrote: .claude/commands/deploy.md
+Initializing AI plugin (stack: mobile)...
+  registered marketplace: ooolab (ooolab/mobile-plugin)
+  enabled plugin: mobile@ooolab
 ✓ claude configured
-  wrote: .cursorrules
-  wrote: .cursor/rules/general.mdc
-  wrote: .cursor/rules/react-native.mdc
-  wrote: .cursor/rules/typescript.mdc
-  wrote: .cursor/rules/agent-reviewer.mdc
+  registered marketplace: ooolab (ooolab/mobile-plugin)
+  enabled plugin: mobile@ooolab
 ✓ cursor configured
 
 Done! AI configs installed.
 ```
 
-### `sync` — Update to latest
+Writes `.ai-plugin.json` (tracks stack + configured tools) and updates `.claude/settings.json` / `.cursor/settings.json`.
+
+### `sync` — Re-register (idempotent)
 
 ```bash
-npx ai-plugin sync            # update all
-npx ai-plugin sync --dry-run   # preview only
-npx ai-plugin sync -t claude   # one tool
+npx ai-plugin sync                        # stack from .ai-plugin.json
+npx ai-plugin sync --stack mobile         # explicit stack
+npx ai-plugin sync --dry-run              # preview only
+npx ai-plugin sync --stack mobile -t claude
 ```
 
-### `list` — See what's available
+Since plugins load live from source, sync is mainly useful after switching stacks or adding tools.
+
+### `list` — Browse available content
 
 ```bash
-npx ai-plugin list
+npx ai-plugin list                        # all stacks
+npx ai-plugin list --stack mobile         # one stack
+npx ai-plugin list --stack mobile -c skills
+```
+
+```
+[mobile]
 
 RULES
   development-workflow     — Development workflow (FVM, git, quality) and subagent delegation
@@ -183,7 +195,7 @@ SKILLS
   dart                     — Naming, syntax, null safety, async, modern language features
   data                     — Retrofit API, remote/local data sources, models, DI (packages/data)
   di                       — get_it + injectable: annotations, modules, test overrides
-  workflow              — Git branching, feature development, CI/CD, code quality
+  workflow                 — Git branching, feature development, CI/CD, code quality
   domain                   — Repository interfaces, use cases, domain exceptions (packages/domain)
   flutter                  — Widget architecture, composition rules, performance patterns
   git                      — Commits, branches, merges, rebases, conflict resolution, recovery
@@ -207,16 +219,27 @@ COMMANDS
 
 ## Shared Content
 
-All shared content lives at the repo root as Markdown with YAML frontmatter.
+All shared content lives under `plugins/<stack>/` as Markdown with YAML frontmatter.
 
 ### Structure
 
 ```
-rules/              # Coding standards and guidelines
-skills/             # Reusable AI skill folders (each with SKILL.md)
-agents/             # Agent role definitions
-commands/           # Command templates
-scripts/            # Shell scripts referenced by commands
+plugins/
+  mobile/                   # Flutter/Dart stack
+    .claude-plugin/
+      plugin.json           # Claude Code plugin manifest
+    .cursor-plugin/
+      plugin.json           # Cursor plugin manifest
+    rules/                  # Coding standards (.md)
+    skills/                 # Skill folders (each with SKILL.md)
+    agents/                 # Agent definitions (.md)
+    commands/               # Command templates (.md)
+    hooks/
+      hooks.json            # PostToolUse dart-format + SessionStart
+    scripts/
+      dart-format.sh        # Auto-format .dart files on edit
+  be/                       # Backend stack (coming soon)
+  fe/                       # Frontend stack (coming soon)
 ```
 
 ### File Format
@@ -225,35 +248,58 @@ scripts/            # Shell scripts referenced by commands
 ---
 title: Human-readable title
 description: One-line description (shown in `list`)
-globs: "**/*.ts"          # Optional: file scope (Cursor)
+globs: "**/*.dart"        # Optional: file scope (Cursor)
 alwaysApply: true          # Optional: auto-apply (Cursor)
 ---
 
 Content here. Markdown supported.
 ```
 
+### Hooks (Claude Code)
+
+The mobile plugin ships with two hooks:
+
+| Event | Action |
+|-------|--------|
+| `PostToolUse` on `Write\|Edit` | Auto-runs `dart format` on edited `.dart` files (if `dart` available) |
+| `SessionStart` | Prints "OOOLab mobile plugin loaded" on session start |
+
+Hook config: `plugins/mobile/hooks/hooks.json`  
+Scripts: `plugins/mobile/scripts/dart-format.sh`
+
 ### How It Works
 
 ```
-{rules,skills,agents,commands}/*.md  ──→  templates/*.hbs  ──→  project config files
-                        │
-                        ├── Claude: CLAUDE.md + .claude/skills/ + .claude/commands/
-                        └── Cursor: .cursorrules + .cursor/rules/*.mdc
+npx ai-plugin init --stack mobile
+        │
+        ├── .claude/settings.json ← extraKnownMarketplaces + enabledPlugins
+        └── .cursor/settings.json ← extraKnownMarketplaces + enabledPlugins
+
+Claude Code / Cursor load plugins natively:
+  plugins/mobile/{skills,agents,commands,hooks}/  ← loaded directly from repo
 ```
 
 | Command | What it does |
 |---------|-------------|
-| `init` | Write `.ai-plugin.json` + generate all tool configs |
-| `sync` | Re-read top-level dirs, re-render templates, update files (skip unchanged) |
-| `list` | Display available rules/skills/agents/commands |
+| `init` | Write `.ai-plugin.json` + register marketplace in tool settings |
+| `sync` | Re-register (idempotent — safe to run anytime) |
+| `list` | Display available rules/skills/agents/commands per stack |
 
 ## Adding New Content
 
-1. Create `.md` in the right top-level directory (`rules/`, `skills/`, `agents/`, `commands/`)
+1. Create `.md` in the right dir under `plugins/<stack>/` (`rules/`, `skills/`, `agents/`, `commands/`)
 2. Add frontmatter: `title` + `description` (minimum)
 3. Write content
-4. `npx ai-plugin list` → verify it shows
-5. Commit + push → all projects get it on next `sync`
+4. `npx ai-plugin list --stack <stack>` → verify it shows
+5. Commit + push → all projects pick it up immediately (no re-sync needed)
+
+## Adding a New Stack
+
+1. Create `plugins/<stack>/` with `rules/`, `skills/`, `agents/`, `commands/` subdirs
+2. Add `plugins/<stack>/.claude-plugin/plugin.json`
+3. Add `plugins/<stack>/.cursor-plugin/plugin.json`
+4. Register in `.claude-plugin/marketplace.json` and `.cursor-plugin/marketplace.json`
+5. Add skills, agents, rules, commands
 
 ## Adding a New AI Tool
 
@@ -262,12 +308,31 @@ Content here. Markdown supported.
 
 ```js
 // src/installers/windsurf.js
-import { loadSharedFiles } from '../utils.js';
-import { writeWithBackup } from './common.js';
+import fs from 'fs-extra';
+import { join } from 'path';
+import chalk from 'chalk';
+import { getMarketplaceConfig } from '../marketplace.js';
 
 export async function syncWindsurf(projectDir, opts = {}) {
-  const rules = await loadSharedFiles('rules');
-  // Transform and write to .windsurfrules format
+  const stack = opts.stack || 'mobile';
+  const { marketplaceName, githubRepo } = await getMarketplaceConfig();
+  const settingsPath = join(projectDir, '.windsurf', 'settings.json');
+
+  let settings = {};
+  if (await fs.pathExists(settingsPath)) {
+    settings = await fs.readJson(settingsPath);
+  }
+
+  settings.extraKnownMarketplaces = settings.extraKnownMarketplaces || {};
+  settings.extraKnownMarketplaces[marketplaceName] = {
+    source: { source: 'github', repo: githubRepo },
+  };
+  settings.enabledPlugins = settings.enabledPlugins || {};
+  settings.enabledPlugins[`${stack}@${marketplaceName}`] = true;
+
+  await fs.ensureDir(join(projectDir, '.windsurf'));
+  await fs.writeJson(settingsPath, settings, { spaces: 2 });
+  console.log(chalk.green(`  registered marketplace: ${marketplaceName}`));
 }
 ```
 
@@ -288,36 +353,36 @@ const TARGETS = {
 ## CI Integration
 
 <details>
-<summary><strong>Auto-sync via GitHub Actions</strong></summary>
+<summary><strong>Auto-register via GitHub Actions</strong></summary>
 
 ```yaml
-# .github/workflows/sync-ai.yml
-name: Sync AI Plugin
+# .github/workflows/register-ai-plugin.yml
+name: Register AI Plugin
 on:
-  schedule:
-    - cron: '0 9 * * 1'  # Weekly Monday 9am
   workflow_dispatch:
+  push:
+    paths:
+      - '.ai-plugin.json'
 
 jobs:
-  sync:
+  register:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: npm install
-      - run: npx ai-plugin sync
+      - run: npx ai-plugin sync --stack mobile
       - uses: peter-evans/create-pull-request@v6
         with:
-          title: 'chore: sync AI plugin rules'
-          branch: chore/sync-ai-plugin
+          title: 'chore: register AI plugin marketplace'
+          branch: chore/register-ai-plugin
 ```
 
 </details>
 
 ## Notes
 
-- Generated files have `<!-- Auto-generated by @ooolab/mobile-plugin -->` header — don't edit directly, `sync` overwrites them
-- `.ai-plugin.json` tracks configured tools — commit this file
-- Generated AI configs (`.cursorrules`, `CLAUDE.md`, etc.) — your choice to gitignore or commit
+- `.ai-plugin.json` tracks configured tools and active stack — commit this file
+- No generated AI config files — Claude Code and Cursor read plugin content directly from the repo source
 
 ## License
 

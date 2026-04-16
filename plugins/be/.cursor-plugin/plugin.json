@@ -1,0 +1,15 @@
+{
+  "name": "be",
+  "displayName": "OOOLab Backend Plugin",
+  "version": "0.0.1",
+  "description": "OOOLab shared AI rules, skills, and agents for backend projects (coming soon)",
+  "author": {
+    "name": "OOOLab"
+  },
+  "license": "UNLICENSED",
+  "keywords": [
+    "backend",
+    "api",
+    "ooolab"
+  ]
+}

@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import { initProject } from './installers/common.js';
 import { syncClaude } from './installers/claude.js';
 import { syncCursor } from './installers/cursor.js';
-import { listShared } from './utils.js';
+import { listShared, listAllStacks } from './utils.js';
 
 const TARGETS = {
   claude: syncClaude,
@@ -20,17 +20,19 @@ export function cli(argv) {
     .command('init')
     .description('Initialize AI plugin in current project')
     .option('-t, --target <tools...>', 'AI tools to configure (claude, cursor)', ['claude', 'cursor'])
+    .option('-s, --stack <name>', 'Tech stack to install (mobile, be, fe)', 'mobile')
+    .option('--dry-run', 'Show what would change without writing')
     .action(async (opts) => {
       const projectDir = process.cwd();
-      console.log(chalk.blue('Initializing AI plugin...'));
+      console.log(chalk.blue(`Initializing AI plugin (stack: ${opts.stack})...`));
 
       for (const target of opts.target) {
         if (!TARGETS[target]) {
           console.log(chalk.red(`Unknown target: ${target}`));
           continue;
         }
-        await initProject(projectDir, target);
-        await TARGETS[target](projectDir);
+        await initProject(projectDir, target, opts.stack);
+        await TARGETS[target](projectDir, { stack: opts.stack, dryRun: opts.dryRun });
         console.log(chalk.green(`✓ ${target} configured`));
       }
 
@@ -41,23 +43,26 @@ export function cli(argv) {
     .command('sync')
     .description('Sync latest shared rules/skills to project')
     .option('-t, --target <tools...>', 'AI tools to sync (claude, cursor)')
+    .option('-s, --stack <name>', 'Tech stack to sync (mobile, be, fe)')
     .option('--dry-run', 'Show what would change without writing')
     .action(async (opts) => {
       const projectDir = process.cwd();
-      const targets = opts.target || detectTargets(projectDir);
+      const targets = opts.target || (await detectTargets(projectDir));
 
       if (targets.length === 0) {
         console.log(chalk.yellow('No AI tools detected. Run `ai-plugin init` first.'));
         return;
       }
 
+      const stack = opts.stack || (await detectStack(projectDir)) || 'mobile';
+
       for (const target of targets) {
         if (!TARGETS[target]) {
           console.log(chalk.red(`Unknown target: ${target}`));
           continue;
         }
-        console.log(chalk.blue(`Syncing ${target}...`));
-        await TARGETS[target](projectDir, { dryRun: opts.dryRun });
+        console.log(chalk.blue(`Syncing ${target} (stack: ${stack})...`));
+        await TARGETS[target](projectDir, { stack, dryRun: opts.dryRun });
         console.log(chalk.green(`✓ ${target} synced`));
       }
     });
@@ -66,8 +71,13 @@ export function cli(argv) {
     .command('list')
     .description('List available shared rules, skills, agents, commands')
     .option('-c, --category <type>', 'Filter by category (rules, skills, agents, commands)')
+    .option('-s, --stack <name>', 'Stack to list (mobile, be, fe) — omit for all stacks')
     .action(async (opts) => {
-      await listShared(opts.category);
+      if (opts.stack) {
+        await listShared(opts.category, opts.stack);
+      } else {
+        await listAllStacks(opts.category);
+      }
     });
 
   program.parse(argv);
@@ -84,4 +94,15 @@ async function detectTargets(projectDir) {
     targets.push('cursor');
   }
   return targets;
+}
+
+async function detectStack(projectDir) {
+  const { existsSync } = await import('fs');
+  const configPath = `${projectDir}/.ai-plugin.json`;
+  if (existsSync(configPath)) {
+    const fs = await import('fs-extra');
+    const config = await fs.default.readJson(configPath);
+    return config.stack || null;
+  }
+  return null;
 }

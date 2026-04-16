@@ -4,15 +4,24 @@ import { fileURLToPath } from 'url';
 import chalk from 'chalk';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const SHARED_DIR = join(__dirname, '..');
+const ROOT_DIR = join(__dirname, '..');
 
 const CATEGORIES = ['rules', 'skills', 'agents', 'commands'];
+const STACKS = ['mobile', 'be', 'fe'];
 
-export async function listShared(category) {
+export function getStackDir(stack = 'mobile') {
+  return join(ROOT_DIR, 'plugins', stack);
+}
+
+export function getRootDir() {
+  return ROOT_DIR;
+}
+
+export async function listShared(category, stack = 'mobile') {
   const categories = category ? [category] : CATEGORIES;
 
   for (const cat of categories) {
-    const items = await loadSharedFiles(cat);
+    const items = await loadSharedFiles(cat, stack);
     if (items.length === 0) continue;
 
     console.log(chalk.bold(`\n${cat.toUpperCase()}`));
@@ -23,8 +32,21 @@ export async function listShared(category) {
   }
 }
 
-export async function loadSharedFiles(category) {
-  const dir = join(SHARED_DIR, category);
+export async function listAllStacks(category) {
+  for (const stack of STACKS) {
+    const dir = getStackDir(stack);
+    try {
+      await stat(dir);
+    } catch {
+      continue;
+    }
+    console.log(chalk.bold.blue(`\n[${stack}]`));
+    await listShared(category, stack);
+  }
+}
+
+export async function loadSharedFiles(category, stack = 'mobile') {
+  const dir = join(getStackDir(stack), category);
   let entries;
   try {
     entries = await readdir(dir);
@@ -45,12 +67,22 @@ export async function loadSharedFiles(category) {
         const content = await readFile(skillPath, 'utf-8');
         const { frontmatter, body } = parseFrontmatter(content);
 
-        // Collect extra files (reference.md, etc.)
+        // Collect extra files (reference dirs, etc.)
         const extraFiles = {};
-        const subFiles = await readdir(entryPath);
-        for (const sf of subFiles) {
-          if (sf !== 'SKILL.md' && extname(sf) === '.md') {
-            extraFiles[basename(sf, '.md')] = await readFile(join(entryPath, sf), 'utf-8');
+        const subEntries = await readdir(entryPath);
+        for (const sf of subEntries) {
+          const sfPath = join(entryPath, sf);
+          const sfStat = await stat(sfPath);
+          if (sfStat.isDirectory()) {
+            // Recurse one level for reference/ subdirs
+            const subFiles = await readdir(sfPath);
+            for (const subFile of subFiles) {
+              if (extname(subFile) === '.md') {
+                extraFiles[`${sf}-${basename(subFile, '.md')}`] = await readFile(join(sfPath, subFile), 'utf-8');
+              }
+            }
+          } else if (sf !== 'SKILL.md' && extname(sf) === '.md') {
+            extraFiles[basename(sf, '.md')] = await readFile(sfPath, 'utf-8');
           }
         }
 
@@ -105,15 +137,4 @@ function extractTitle(content) {
   return match ? match[1] : null;
 }
 
-function extractDescription(content) {
-  const { frontmatter } = parseFrontmatter(content);
-  return frontmatter.description || null;
-}
-
-export function getSharedDir() {
-  return SHARED_DIR;
-}
-
-export function getTemplateDir() {
-  return join(__dirname, '..', 'templates');
-}
+export { STACKS };

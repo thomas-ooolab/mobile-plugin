@@ -1,0 +1,15 @@
+{
+  "name": "fe",
+  "version": "0.0.1",
+  "description": "OOOLab shared AI skills, agents, and rules for frontend projects (coming soon)",
+  "author": {
+    "name": "OOOLab",
+    "url": "https://github.com/ooolab"
+  },
+  "license": "UNLICENSED",
+  "keywords": [
+    "frontend",
+    "web",
+    "ooolab"
+  ]
+}

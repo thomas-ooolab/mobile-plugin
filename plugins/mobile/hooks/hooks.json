@@ -1,0 +1,28 @@
+{
+  "description": "Mobile plugin hooks — format Dart files on edit, display context on session start",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/scripts/dart-format.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '✓ OOOLab mobile plugin loaded — Flutter/Dart skills, agents, and commands active'"
+          }
+        ]
+      }
+    ]
+  }
+}

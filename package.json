@@ -1,7 +1,7 @@
 {
   "name": "@ooolab/mobile-plugin",
   "version": "0.1.0",
-  "description": "Shared AI skills, agents, rules, and commands across projects and AI tools",
+  "description": "Shared AI skills, agents, rules, and commands for mobile, backend, and frontend projects",
   "type": "module",
   "bin": {
     "ai-plugin": "./bin/ai-plugin.js",
@@ -14,10 +14,7 @@
   "files": [
     "bin/",
     "src/",
-    "rules/",
-    "skills/",
-    "agents/",
-    "commands/",
+    "plugins/",
     "templates/",
     ".claude-plugin/",
     ".cursor-plugin/"

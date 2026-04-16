@@ -4,15 +4,25 @@
     "name": "OOOLab"
   },
   "metadata": {
-    "description": "OOOLab mobile plugin marketplace — Flutter/Dart shared AI context",
-    "version": "0.1.0"
+    "description": "OOOLab AI plugin marketplace — shared rules, skills, agents, and commands for mobile, backend, and frontend projects",
+    "version": "0.1.0",
+    "pluginRoot": "plugins"
   },
   "plugins": [
     {
       "name": "mobile",
-      "source": "./",
-      "description": "Shared rules, skills, agents, and commands for OOOLab Flutter/Dart projects",
-      "version": "0.1.0"
+      "source": "./plugins/mobile",
+      "description": "Flutter/Dart rules, skills, agents, and commands for mobile projects"
+    },
+    {
+      "name": "be",
+      "source": "./plugins/be",
+      "description": "Backend project rules and skills (coming soon)"
+    },
+    {
+      "name": "fe",
+      "source": "./plugins/fe",
+      "description": "Frontend project rules and skills (coming soon)"
     }
   ]
 }

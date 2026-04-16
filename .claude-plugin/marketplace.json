@@ -2,19 +2,49 @@
   "name": "ooolab",
   "owner": {
     "name": "OOOLab",
-    "url": "https://github.com/ooolab"
+    "url": "https://github.com/thomas-ooolab/mobile-plugin"
   },
   "metadata": {
-    "description": "OOOLab mobile plugin marketplace — Flutter/Dart shared AI context",
-    "version": "0.1.0"
+    "description": "OOOLab AI plugin marketplace — shared skills, agents, and rules for mobile, backend, and frontend projects",
+    "version": "0.1.0",
+    "pluginRoot": "plugins"
   },
   "plugins": [
     {
       "name": "mobile",
-      "source": "./",
-      "description": "Shared rules, skills, agents, and commands for OOOLab Flutter/Dart projects",
+      "source": "./plugins/mobile",
+      "description": "Flutter/Dart skills, agents, commands, and rules for mobile projects",
       "version": "0.1.0",
-      "strict": true
+      "author": {
+        "name": "OOOLab"
+      },
+      "category": "mobile",
+      "tags": ["flutter", "dart", "mobile", "clean-architecture"],
+      "keywords": ["flutter", "dart", "mobile", "clean-architecture"]
+    },
+    {
+      "name": "be",
+      "source": "./plugins/be",
+      "description": "Skills, agents, and rules for backend projects (coming soon)",
+      "version": "0.0.1",
+      "author": {
+        "name": "OOOLab"
+      },
+      "category": "backend",
+      "tags": ["backend", "api"],
+      "keywords": ["backend", "api"]
+    },
+    {
+      "name": "fe",
+      "source": "./plugins/fe",
+      "description": "Skills, agents, and rules for frontend projects (coming soon)",
+      "version": "0.0.1",
+      "author": {
+        "name": "OOOLab"
+      },
+      "category": "frontend",
+      "tags": ["frontend", "web"],
+      "keywords": ["frontend", "web"]
     }
   ]
 }
