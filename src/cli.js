@@ -12,7 +12,7 @@ const TARGETS = {
 
 export function cli(argv) {
   program
-    .name('ai-plugin')
+    .name('ooolab-plugin')
     .description('Shared AI skills, agents, rules, and commands')
     .version('0.1.0');
 
@@ -50,7 +50,7 @@ export function cli(argv) {
       const targets = opts.target || (await detectTargets(projectDir));
 
       if (targets.length === 0) {
-        console.log(chalk.yellow('No AI tools detected. Run `ai-plugin init` first.'));
+        console.log(chalk.yellow('No AI tools detected. Run `ooolab-plugin init` first.'));
         return;
       }
 
@@ -98,7 +98,7 @@ async function detectTargets(projectDir) {
 
 async function detectStack(projectDir) {
   const { existsSync } = await import('fs');
-  const configPath = `${projectDir}/.ai-plugin.json`;
+  const configPath = `${projectDir}/.ooolab-plugin.json`;
   if (existsSync(configPath)) {
     const fs = await import('fs-extra');
     const config = await fs.default.readJson(configPath);

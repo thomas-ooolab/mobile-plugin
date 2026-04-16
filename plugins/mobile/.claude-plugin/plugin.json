@@ -6,8 +6,8 @@
     "name": "OOOLab",
     "url": "https://github.com/ooolab"
   },
-  "homepage": "https://github.com/thomas-ooolab/mobile-plugin",
-  "repository": "https://github.com/thomas-ooolab/mobile-plugin",
+  "homepage": "https://github.com/thomas-ooolab/ooolab-plugin",
+  "repository": "https://github.com/thomas-ooolab/ooolab-plugin",
   "license": "UNLICENSED",
   "keywords": [
     "flutter",

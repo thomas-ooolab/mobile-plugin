@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 import { join } from 'path';
 
-const CONFIG_FILE = '.ai-plugin.json';
+const CONFIG_FILE = '.ooolab-plugin.json';
 
 export async function initProject(projectDir, target, stack = 'mobile') {
   const configPath = join(projectDir, CONFIG_FILE);

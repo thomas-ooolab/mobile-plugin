@@ -47,7 +47,7 @@ Rules drift. New projects start from scratch. Onboarding is "copy from that othe
 ### ✅ With plugin
 
 ```bash
-npx ai-plugin init --stack mobile
+npx ooolab-plugin init --stack mobile
 ```
 
 ```jsonc
@@ -55,7 +55,7 @@ npx ai-plugin init --stack mobile
 {
   "extraKnownMarketplaces": {
     "ooolab": { "source": { "source": "github",
-                            "repo": "thomas-ooolab/mobile-plugin" } }
+                            "repo": "thomas-ooolab/ooolab-plugin" } }
   },
   "enabledPlugins": { "mobile@ooolab": true }
 }
@@ -104,7 +104,7 @@ More coming: Windsurf, Copilot, Cline.
 ### As a Claude Code plugin (recommended — no CLI needed)
 
 ```
-/plugin marketplace add thomas-ooolab/mobile-plugin
+/plugin marketplace add thomas-ooolab/ooolab-plugin
 /plugin install mobile@ooolab
 ```
 
@@ -113,7 +113,7 @@ Skills, agents, commands, and hooks load natively. Claude Code reads `plugins/mo
 ### As a Cursor plugin (no CLI needed)
 
 ```
-/plugin marketplace add thomas-ooolab/mobile-plugin
+/plugin marketplace add thomas-ooolab/ooolab-plugin
 /plugin install mobile@ooolab
 ```
 
@@ -121,15 +121,15 @@ Skills, agents, commands, and hooks load natively. Claude Code reads `plugins/mo
 
 ```bash
 # Run directly from GitHub, no install needed
-npx github:thomas-ooolab/mobile-plugin init --stack mobile
+npx github:thomas-ooolab/ooolab-plugin init --stack mobile
 
 # Or install as devDependency
-npm install --save-dev github:thomas-ooolab/mobile-plugin
-npx ai-plugin init --stack mobile
+npm install --save-dev github:thomas-ooolab/ooolab-plugin
+npx ooolab-plugin init --stack mobile
 
 # Or install globally
-npm install -g github:thomas-ooolab/mobile-plugin
-ai-plugin init --stack mobile
+npm install -g github:thomas-ooolab/ooolab-plugin
+ooolab-plugin init --stack mobile
 ```
 
 ## Usage
@@ -138,39 +138,39 @@ ai-plugin init --stack mobile
 
 ```bash
 # Mobile stack, both Claude + Cursor
-npx ai-plugin init --stack mobile
+npx ooolab-plugin init --stack mobile
 
 # Preview only
-npx ai-plugin init --stack mobile --dry-run
+npx ooolab-plugin init --stack mobile --dry-run
 
 # Single tool
-npx ai-plugin init --stack mobile -t claude
-npx ai-plugin init --stack mobile -t cursor
+npx ooolab-plugin init --stack mobile -t claude
+npx ooolab-plugin init --stack mobile -t cursor
 ```
 
 Output:
 
 ```
 Initializing AI plugin (stack: mobile)...
-  registered marketplace: ooolab (thomas-ooolab/mobile-plugin)
+  registered marketplace: ooolab (thomas-ooolab/ooolab-plugin)
   enabled plugin: mobile@ooolab
 ✓ claude configured
-  registered marketplace: ooolab (thomas-ooolab/mobile-plugin)
+  registered marketplace: ooolab (thomas-ooolab/ooolab-plugin)
   enabled plugin: mobile@ooolab
 ✓ cursor configured
 
 Done! AI configs installed.
 ```
 
-Writes `.ai-plugin.json` (tracks stack + configured tools) and updates `.claude/settings.json` / `.cursor/settings.json`.
+Writes `.ooolab-plugin.json` (tracks stack + configured tools) and updates `.claude/settings.json` / `.cursor/settings.json`.
 
 ### `sync` — Re-register (idempotent)
 
 ```bash
-npx ai-plugin sync                        # stack from .ai-plugin.json
-npx ai-plugin sync --stack mobile         # explicit stack
-npx ai-plugin sync --dry-run              # preview only
-npx ai-plugin sync --stack mobile -t claude
+npx ooolab-plugin sync                        # stack from .ooolab-plugin.json
+npx ooolab-plugin sync --stack mobile         # explicit stack
+npx ooolab-plugin sync --dry-run              # preview only
+npx ooolab-plugin sync --stack mobile -t claude
 ```
 
 Since plugins load live from source, sync is mainly useful after switching stacks or adding tools.
@@ -178,9 +178,9 @@ Since plugins load live from source, sync is mainly useful after switching stack
 ### `list` — Browse available content
 
 ```bash
-npx ai-plugin list                        # all stacks
-npx ai-plugin list --stack mobile         # one stack
-npx ai-plugin list --stack mobile -c skills
+npx ooolab-plugin list                        # all stacks
+npx ooolab-plugin list --stack mobile         # one stack
+npx ooolab-plugin list --stack mobile -c skills
 ```
 
 ```
@@ -270,7 +270,7 @@ Scripts: `plugins/mobile/scripts/dart-format.sh`
 ### How It Works
 
 ```
-npx ai-plugin init --stack mobile
+npx ooolab-plugin init --stack mobile
         │
         ├── .claude/settings.json ← extraKnownMarketplaces + enabledPlugins
         └── .cursor/settings.json ← extraKnownMarketplaces + enabledPlugins
@@ -281,7 +281,7 @@ Claude Code / Cursor load plugins natively:
 
 | Command | What it does |
 |---------|-------------|
-| `init` | Write `.ai-plugin.json` + register marketplace in tool settings |
+| `init` | Write `.ooolab-plugin.json` + register marketplace in tool settings |
 | `sync` | Re-register (idempotent — safe to run anytime) |
 | `list` | Display available rules/skills/agents/commands per stack |
 
@@ -290,7 +290,7 @@ Claude Code / Cursor load plugins natively:
 1. Create `.md` in the right dir under `plugins/<stack>/` (`rules/`, `skills/`, `agents/`, `commands/`)
 2. Add frontmatter: `title` + `description` (minimum)
 3. Write content
-4. `npx ai-plugin list --stack <stack>` → verify it shows
+4. `npx ooolab-plugin list --stack <stack>` → verify it shows
 5. Commit + push → all projects pick it up immediately (no re-sync needed)
 
 ## Adding a New Stack
@@ -356,13 +356,13 @@ const TARGETS = {
 <summary><strong>Auto-register via GitHub Actions</strong></summary>
 
 ```yaml
-# .github/workflows/register-ai-plugin.yml
+# .github/workflows/register-ooolab-plugin.yml
 name: Register AI Plugin
 on:
   workflow_dispatch:
   push:
     paths:
-      - '.ai-plugin.json'
+      - '.ooolab-plugin.json'
 
 jobs:
   register:
@@ -370,18 +370,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: npm install
-      - run: npx ai-plugin sync --stack mobile
+      - run: npx ooolab-plugin sync --stack mobile
       - uses: peter-evans/create-pull-request@v6
         with:
           title: 'chore: register AI plugin marketplace'
-          branch: chore/register-ai-plugin
+          branch: chore/register-ooolab-plugin
 ```
 
 </details>
 
 ## Notes
 
-- `.ai-plugin.json` tracks configured tools and active stack — commit this file
+- `.ooolab-plugin.json` tracks configured tools and active stack — commit this file
 - No generated AI config files — Claude Code and Cursor read plugin content directly from the repo source
 
 ## License
