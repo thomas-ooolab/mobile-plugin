@@ -19,28 +19,34 @@ packages/data/lib/src/
 ├── remote/
 │   ├── remote.dart                      # Barrel — export interfaces only
 │   ├── api/
+│   │   ├── api.dart                     # Barrel — exports all feature barrels
 │   │   └── <feature>/
-│   │       └── <feature>_api.dart       # Retrofit API
+│   │       ├── <feature>_api.dart       # Retrofit API
+│   │       └── <feature>.dart           # Barrel
 │   ├── datasource/
+│   │   ├── datasource.dart              # Barrel — exports all feature barrels
 │   │   └── <feature>/
 │   │       ├── <feature>_remote_datasource.dart       # Interface
 │   │       ├── <feature>_remote_datasource_impl.dart  # Implementation
 │   │       ├── model/                                  # Request/Response DTOs
-│   │       │   └── <model_name>.dart
-│   │       └── datasource.dart                         # Barrel
+│   │       │   ├── <model_name>.dart
+│   │       │   └── model.dart                          # Barrel
+│   │       └── <feature>.dart                          # Barrel
 │   └── network/                         # Dio, interceptors
 └── local/
     ├── local.dart                       # Barrel — export interfaces only
     ├── datasource/
+    │   ├── datasource.dart              # Barrel — exports all feature barrels
     │   └── <feature>/
     │       ├── <feature>_local_datasource.dart       # Interface
     │       ├── <feature>_local_datasource_impl.dart  # Implementation
-    │       └── datasource.dart                        # Barrel
+    │       └── <feature>.dart                         # Barrel
     └── model/                           # Local storage models
 ```
 
 ## API Layer (`lib/src/remote/api/<feature>/`)
 
+- Barrel: `<feature>.dart` — export `<feature>_api.dart`
 - One Retrofit API per feature: `<feature>_api.dart`
 - `abstract interface class FeatureApi` with `@RestApi()`
 - Factory constructor: `factory FeatureApi(Dio dio) = _FeatureApi`
