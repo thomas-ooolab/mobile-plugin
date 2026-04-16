@@ -22,29 +22,5 @@
       "tags": ["flutter", "dart", "mobile", "clean-architecture"],
       "keywords": ["flutter", "dart", "mobile", "clean-architecture"]
     },
-    {
-      "name": "be",
-      "source": "./plugins/be",
-      "description": "Skills, agents, and rules for backend projects (coming soon)",
-      "version": "0.0.1",
-      "author": {
-        "name": "OOOLab"
-      },
-      "category": "backend",
-      "tags": ["backend", "api"],
-      "keywords": ["backend", "api"]
-    },
-    {
-      "name": "fe",
-      "source": "./plugins/fe",
-      "description": "Skills, agents, and rules for frontend projects (coming soon)",
-      "version": "0.0.1",
-      "author": {
-        "name": "OOOLab"
-      },
-      "category": "frontend",
-      "tags": ["frontend", "web"],
-      "keywords": ["frontend", "web"]
-    }
   ]
 }

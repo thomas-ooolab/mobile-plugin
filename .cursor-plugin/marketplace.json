@@ -13,16 +13,6 @@
       "name": "mobile",
       "source": "./plugins/mobile",
       "description": "Flutter/Dart rules, skills, agents, and commands for mobile projects"
-    },
-    {
-      "name": "be",
-      "source": "./plugins/be",
-      "description": "Backend project rules and skills (coming soon)"
-    },
-    {
-      "name": "fe",
-      "source": "./plugins/fe",
-      "description": "Frontend project rules and skills (coming soon)"
     }
   ]
 }
