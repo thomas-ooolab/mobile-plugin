@@ -68,3 +68,4 @@ fi
 
 echo "$new_version"
 git commit -m "$MSG"
+git push

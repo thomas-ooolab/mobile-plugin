@@ -24,8 +24,6 @@ git add -A
 ```
 bash .claude/commands/scripts/commit.sh <major|minor|patch> "<commit message>"
 ```
-The script auto-detects change scope, bumps the correct version files, stages them, and runs `git commit`. Print the new version to the user.
+The script auto-detects change scope, bumps the correct version files, stages them, runs `git commit`, and pushes. Print the new version to the user.
 - Changes only in `plugins/**` → bumps `plugins/mobile/.claude-plugin/plugin.json` and `plugins/mobile/.cursor-plugin/plugin.json`
 - Any change outside `plugins/**` → bumps `.claude-plugin/marketplace.json` and `.cursor-plugin/marketplace.json`
-
-**Step 4 — Push.**
