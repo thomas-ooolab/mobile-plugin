@@ -47,7 +47,17 @@ After user confirms, create each artifact. Load only the guide for the artifact 
 
 Do not load guides for artifact types not in the plan.
 
-## Step 4 — Self-review
+## Step 4 — Update README
+
+If any artifact was created or modified under `plugins/`, update `README.md`:
+
+- Counts in the ASCII box (skills, agents, commands) if changed
+- Skills/agents/commands listing table — add, remove, or update description rows to match current `plugins/mobile/{skills,agents,commands}/`
+- Any new stack additions update the Stacks table
+
+Skip this step if no `plugins/` files were changed.
+
+## Step 5 — Self-review
 
 After all artifacts created, apply each guide's checklist to its artifact type.
 
