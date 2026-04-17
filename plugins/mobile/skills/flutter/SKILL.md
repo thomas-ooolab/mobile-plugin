@@ -18,15 +18,17 @@ This document focuses on Flutter-specific patterns. For complete guidance, also 
 2. **Const Constructors** - Use const everywhere possible for performance
 3. **Widget Composition** - Build widget trees with classes, not nested functions
 4. **StatelessWidget First** - Prefer StatelessWidget, use StatefulWidget only for local UI state
-5. **Small, Focused Widgets** - Keep widgets under 200 lines, extract complexity
+5. **Small, Focused Widgets** - Keep each `.dart` widget file under 200 lines; split into separate files if exceeded
 
 ## Reference Documentation
 
-| Topic | File | What's inside |
-|-------|------|---------------|
-| Widget Classes vs Build Methods, StatelessWidget vs StatefulWidget, Composition, Keys | [`reference/widget-architecture.md`](reference/widget-architecture.md) | Full rules with DO/DON'T examples |
-| Const constructors, List performance, Image optimization, Build optimization | [`reference/performance.md`](reference/performance.md) | Performance patterns with code examples |
-| Component design, Package structure, Theming, Naming conventions | [`reference/ui-kit.md`](reference/ui-kit.md) | UI kit package guidelines |
+| Topic | File |
+|-------|------|
+| Widget classes vs build methods | [`reference/widget-architecture.md`](reference/widget-architecture.md) |
+| StatelessWidget vs StatefulWidget | [`reference/stateful-stateless.md`](reference/stateful-stateless.md) |
+| Widget composition & keys | [`reference/widget-composition.md`](reference/widget-composition.md) |
+| Const constructors, list/image/build optimization | [`reference/performance.md`](reference/performance.md) |
+| Component design, theming, naming conventions | [`reference/ui-kit.md`](reference/ui-kit.md) |
 
 ## Best Practices Summary
 
@@ -40,7 +42,8 @@ This document focuses on Flutter-specific patterns. For complete guidance, also 
 - Use CachedNetworkImage for network images
 - Use keys for list items
 - Split large widgets into smaller, focused widget classes
-- Keep widgets under 200 lines
+- Keep each `.dart` widget file under 200 lines; split into separate files if exceeded
+- Split complex `build` methods into separate widget classes; use private build methods only for simple (≤15 lines), no-param, single-use sections
 - Organize widgets by feature
 - Use UI kit components for consistent design
 
@@ -53,6 +56,7 @@ This document focuses on Flutter-specific patterns. For complete guidance, also 
 - Skip keys in list items
 - Ignore const optimization opportunities
 - Hardcode strings (use localization)
+- Write monolithic `build` methods — split complex sections into separate widget classes
 
 ### PREFER
 - Widget classes over build methods (always!)
@@ -64,7 +68,7 @@ This document focuses on Flutter-specific patterns. For complete guidance, also 
 
 ### AVOID
 - Build methods with parameters
-- Widgets larger than 200 lines
+- Dart widget files larger than 200 lines — split instead
 - Deep nesting without extraction
 - Mixing business logic and UI
 - Direct repository/service calls from widgets

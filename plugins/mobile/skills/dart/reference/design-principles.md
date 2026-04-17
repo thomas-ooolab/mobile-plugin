@@ -165,6 +165,42 @@ final widget = Padding(padding: edgeInsets, child: child);
 Declare const constructors on your own classes when instances can be created at compile time (all fields final and constructor is const). When calling constructors—including framework widgets and value types—use the `const` keyword when every argument is a compile-time constant so the compiler can canonicalize instances and reduce allocations.
 
 ## Functions
+
+### Method Length — 100-Line Limit
+
+Keep every method/function body under 100 lines. If it exceeds 100 lines, extract cohesive steps into private helper methods.
+
+```dart
+// BAD — one method doing too much (150+ lines)
+Future<void> submitOrder(Order order) async {
+  // 20 lines: validate order
+  // 30 lines: calculate pricing
+  // 40 lines: call payment API
+  // 30 lines: update inventory
+  // 20 lines: send confirmation email
+  // 20 lines: log analytics
+}
+
+// GOOD — orchestrator delegates to focused helpers (<100 lines each)
+Future<void> submitOrder(Order order) async {
+  _validateOrder(order);
+  final pricing = await _calculatePricing(order);
+  final payment = await _processPayment(order, pricing);
+  await _updateInventory(order);
+  await _sendConfirmation(order, payment);
+  _logOrderAnalytics(order, payment);
+}
+
+Future<PaymentResult> _processPayment(Order order, Pricing pricing) async {
+  // focused, testable, <100 lines
+}
+```
+
+Extraction signals — pull out a block when:
+- It has a clear name that describes what it does
+- It can be tested independently
+- It is called from more than one place, or could be
+
 - **DO** use a function declaration to bind a function to a name.
 ```dart
 // Good

@@ -2,15 +2,98 @@
 
 ## Table of Contents
 - [Widget Classes vs Build Methods](#widget-classes-vs-build-methods)
-- [StatelessWidget vs StatefulWidget](#statelesswidget-vs-statefulwidget)
-- [Widget Composition](#widget-composition)
-- [Widget Keys](#widget-keys)
+- [StatelessWidget vs StatefulWidget](stateful-stateless.md)
+- [Widget Composition & Keys](widget-composition.md)
 
 ---
 
 ## Widget Classes vs Build Methods
 
 **CRITICAL RULE**: ALWAYS use Widget classes instead of build methods for reusable UI components.
+
+### File Size Rule — 200-Line Limit
+
+Keep every Dart widget file under 200 lines. If a file exceeds 200 lines, split it into focused files within the same folder.
+
+```
+// BAD — one file with everything
+lib/screens/product/product_screen.dart  (450 lines)
+
+// GOOD — split by responsibility
+lib/screens/product/product_screen.dart       (main screen, ~60 lines)
+lib/screens/product/product_header.dart       (header widget, ~80 lines)
+lib/screens/product/product_details.dart      (details section, ~90 lines)
+lib/screens/product/product_action_bar.dart   (bottom actions, ~50 lines)
+```
+
+Rules for splitting:
+- Each file = one primary widget class (plus small private helpers used only in that file)
+- Name file after the primary widget: `UserAvatar` → `user_avatar.dart`
+- Keep split files in the same feature folder — do not create a `widgets/` subfolder unless shared across features
+- Export split files from the folder's barrel file (`view.dart` or `model.dart`)
+
+### Build Method — Split When Complex
+
+When a `build` method grows too large or handles multiple distinct sections, split it:
+
+1. **Prefer separate widget class** — use when the section has parameters, could be reused, or has meaningful independent state.
+2. **Private build method** — only acceptable when the section is simple (≤15 lines), has no parameters, and is used exactly once.
+
+```dart
+// BAD — one monolithic build method
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      // 15 lines of appbar config
+    ),
+    body: Column(
+      children: [
+        // 25 lines of header section
+        // 40 lines of content list
+        // 20 lines of footer actions
+      ],
+    ),
+  );
+}
+
+// GOOD — separate widget classes for complex sections
+@override
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: ProductAppBar(product: product),
+    body: Column(
+      children: [
+        ProductHeader(product: product),
+        ProductContentList(items: product.items),
+        ProductFooterActions(product: product, onBuy: _handleBuy),
+      ],
+    ),
+  );
+}
+
+// ACCEPTABLE — private build method only for simple, no-param, single-use sections
+@override
+Widget build(BuildContext context) {
+  return Column(
+    children: [
+      _buildDivider(),   // simple, no params, <5 lines — acceptable
+      ProductDetails(product: product),
+    ],
+  );
+}
+
+Widget _buildDivider() => const Divider(height: 1, thickness: 1);
+```
+
+Decision rule:
+
+| Section has params? | Reused elsewhere? | Complex (>15 lines)? | Action |
+|---------------------|-------------------|----------------------|--------|
+| Yes | — | — | Separate widget class |
+| No | Yes | — | Separate widget class |
+| No | No | Yes | Separate widget class |
+| No | No | No | Private build method OK |
 
 ### Why Widget Classes Are Mandatory
 
@@ -159,299 +242,9 @@ class ProfileDivider extends StatelessWidget {
 
 ---
 
-## StatelessWidget vs StatefulWidget
+## Reference
 
-- **PREFER** StatelessWidget when widget doesn't need mutable state.
-```dart
-// Good - Stateless for immutable widgets
-class UserAvatar extends StatelessWidget {
-  const UserAvatar({
-    required this.imageUrl,
-    this.radius = 20,
-    super.key,
-  });
-
-  final String imageUrl;
-  final double radius;
-
-  @override
-  Widget build(BuildContext context) {
-    return CircleAvatar(
-      radius: radius,
-      backgroundImage: NetworkImage(imageUrl),
-    );
-  }
-}
-```
-
-- **DO** use StatefulWidget ONLY for local UI state (animations, form controllers, scroll controllers).
-```dart
-// Good - Stateful for local UI state only
-class ExpandableCard extends StatefulWidget {
-  const ExpandableCard({
-    required this.title,
-    required this.content,
-    super.key,
-  });
-
-  final String title;
-  final Widget content;
-
-  @override
-  State<ExpandableCard> createState() => _ExpandableCardState();
-}
-
-class _ExpandableCardState extends State<ExpandableCard> {
-  bool _isExpanded = false;
-
-  void _toggleExpanded() {
-    setState(() {
-      _isExpanded = !_isExpanded;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Column(
-        children: [
-          ListTile(
-            title: Text(widget.title),
-            trailing: Icon(
-              _isExpanded ? Icons.expand_less : Icons.expand_more,
-            ),
-            onTap: _toggleExpanded,
-          ),
-          if (_isExpanded) widget.content,
-        ],
-      ),
-    );
-  }
-}
-```
-
-- **DON'T** use StatefulWidget for business logic (use BLoC/Cubit per `@state`).
-```dart
-// BAD - StatefulWidget managing business logic
-class UserListScreen extends StatefulWidget {
-  const UserListScreen({super.key});
-
-  @override
-  State<UserListScreen> createState() => _UserListScreenState();
-}
-
-class _UserListScreenState extends State<UserListScreen> {
-  List<User> _users = [];
-  bool _isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUsers(); // BAD: business logic in widget!
-  }
-
-  Future<void> _loadUsers() async {
-    setState(() => _isLoading = true);
-    _users = await userRepository.getUsers(); // BAD: direct repository call!
-    setState(() => _isLoading = false);
-  }
-  // ...
-}
-
-// GOOD - Use BLoC/Cubit for business logic (see @state)
-class UserListScreen extends StatelessWidget {
-  const UserListScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => UserListCubit(
-        userRepository: sl<UserRepository>(), // GOOD: service locator
-      )..loadUsers(),
-      child: const UserListView(),
-    );
-  }
-}
-```
-
----
-
-## Widget Composition
-
-- **DO** compose complex UIs from small, focused widget classes.
-```dart
-// Good - Small, focused widgets (each <50 lines)
-class ProductCard extends StatelessWidget {
-  const ProductCard({
-    required this.product,
-    this.onTap,
-    super.key,
-  });
-
-  final Product product;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: InkWell(
-        onTap: onTap,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ProductImage(imageUrl: product.imageUrl),
-            ProductInfo(product: product),
-            ProductPrice(price: product.price),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class ProductImage extends StatelessWidget {
-  const ProductImage({required this.imageUrl, super.key});
-
-  final String imageUrl;
-
-  @override
-  Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 16 / 9,
-      child: CachedNetworkImage(
-        imageUrl: imageUrl,
-        fit: BoxFit.cover,
-      ),
-    );
-  }
-}
-
-class ProductInfo extends StatelessWidget {
-  const ProductInfo({required this.product, super.key});
-
-  final Product product;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            product.name,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            product.description,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
-    );
-  }
-}
-```
-
-- **AVOID** deeply nested widget trees without extraction.
-```dart
-// BAD - Deeply nested, hard to read and maintain
-@override
-Widget build(BuildContext context) {
-  return Card(
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                child: Icon(Icons.person),
-              ),
-              SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(user.name, style: TextStyle(fontSize: 18)),
-                  Text(user.email, style: TextStyle(fontSize: 14)),
-                ],
-              ),
-            ],
-          ),
-          // ... 50 more lines
-        ],
-      ),
-    ),
-  );
-}
-
-// GOOD - Extracted into focused widget classes
-@override
-Widget build(BuildContext context) {
-  return Card(
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          UserHeader(user: user),
-          const SizedBox(height: 16),
-          UserDetails(user: user),
-          const SizedBox(height: 16),
-          UserActions(user: user),
-        ],
-      ),
-    ),
-  );
-}
-```
-
----
-
-## Widget Keys
-
-- **DO** use keys for widgets in lists.
-```dart
-// Good - Keys for list items
-ListView.builder(
-  itemCount: items.length,
-  itemBuilder: (context, index) {
-    final item = items[index];
-    return ProductCard(
-      key: ValueKey(item.id), // Use ValueKey with unique ID
-      product: item,
-    );
-  },
-);
-```
-
-- **DO** use GlobalKey when you need to access widget state from parent.
-```dart
-// Good - GlobalKey for form validation
-class LoginScreen extends StatelessWidget {
-  LoginScreen({super.key});
-
-  final _formKey = GlobalKey<FormState>();
-
-  void _handleSubmit() {
-    if (_formKey.currentState!.validate()) {
-      // Submit form
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        children: [
-          EmailField(),
-          PasswordField(),
-          SubmitButton(onPressed: _handleSubmit),
-        ],
-      ),
-    );
-  }
-}
-```
+| Topic | File |
+|-------|------|
+| StatelessWidget vs StatefulWidget | [stateful-stateless.md](stateful-stateless.md) |
+| Widget Composition & Keys | [widget-composition.md](widget-composition.md) |

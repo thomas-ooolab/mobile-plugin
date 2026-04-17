@@ -194,6 +194,7 @@ for (final user in users) {
 - Use getters for expensive operations
 - Redundantly annotate local variable types
 - Use abbreviated variable names — write `foregroundColor`, not `_fg`; `backgroundColor`, not `_bg`; `controller`, not `ctrl`; `callback`, not `cb` (see naming-conventions.md for full list)
+- Write methods longer than 100 lines — extract cohesive steps into private helper methods instead
 
 ### PREFER
 - Making fields `final`

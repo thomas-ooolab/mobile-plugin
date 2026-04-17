@@ -38,6 +38,25 @@ Future<UserProfile> fetchProfile({required String token}) async { ... }
 
 Reference: [dartdoc documentation](https://pub.dev/documentation/dartdoc/latest/) — full guide in [reference/code-style.md](reference/code-style.md#documentation--comments).
 
+### Method Length — 100-Line Limit
+
+Keep every method/function body under 100 lines. Extract cohesive steps into private helpers when exceeded.
+
+```dart
+// BAD — monolith method
+Future<void> submitOrder(Order order) async {
+  // validate (20 lines) + price (30 lines) + pay (40 lines) + notify (30 lines) ...
+}
+
+// GOOD — orchestrator + focused helpers
+Future<void> submitOrder(Order order) async {
+  _validateOrder(order);
+  final pricing = await _calculatePricing(order);
+  await _processPayment(order, pricing);
+  await _sendConfirmation(order);
+}
+```
+
 ### Modern Dart Features (Dart 3.0+)
 1. **Use Patterns and Destructuring** - Extract multiple values concisely
 2. **Use Named Parameters** - Make constructors and methods self-documenting
