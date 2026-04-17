@@ -65,7 +65,7 @@ Future<void> submitOrder(Order order) async {
 5. **Use Class Modifiers** - Express design intent with sealed, final, base, interface, mixin class
 6. **Use Extension Types** - Create zero-cost wrappers with compile-time safety
 7. **Use Enhanced Enums** - Add methods and properties to enums
-8. **Use Dot Shorthand (Dart 3.10+)** - Eliminate redundant type names when the context already defines them
+8. **Use Dot Shorthand (Dart 3.10+)** - **Required** for all enum usages where context type is explicit (assignments, parameters, switch arms, collections, equality checks). Never write `EnumType.member` when context already provides the type.
 
 ### Memory: Prefer `late final` over `static const` for Object Collections
 

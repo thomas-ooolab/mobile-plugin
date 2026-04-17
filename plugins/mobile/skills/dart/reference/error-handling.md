@@ -148,6 +148,7 @@ for (final user in users) {
 ## Best Practices Summary
 
 ### DO
+- Use dot shorthand for **all** enum usages with explicit context type — never write `EnumType.member` when the surrounding type is already known (assignments, parameters, switch arms, collections, `==`/`!=`)
 - Use `UpperCamelCase` for types
 - Use `lowerCamelCase` for members
 - Use `lowercase_with_underscores` for libraries

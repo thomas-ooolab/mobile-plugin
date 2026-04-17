@@ -492,22 +492,40 @@ Reference: [Dart Dot Shorthands Documentation](https://dart.dev/language/dot-sho
 
 ### Enums with Dot Shorthand
 
+**Dot shorthand is REQUIRED for all enum usages where the type is available from context.** Never write `EnumType.member` when the surrounding context already supplies the type.
+
 ```dart
 enum Color { red, green, blue }
 
-Color myColor = .green; // Equivalent to Color.green
+// GOOD — typed variable: context is explicit
+Color myColor = .green;
 
+// GOOD — typed parameter: context from declaration
 void setColor(Color color) {}
-setColor(.red); // Parameter type supplies context
+setColor(.red);
 
+// GOOD — switch arms: enum type from switched expression
 String getColorName(Color color) => switch (color) {
   .red => 'Red',
   .green => 'Green',
   .blue => 'Blue',
 };
 
-var myColor = .green;      // Error: no context type
-final colors = [.red];     // Error: list type unknown
+// GOOD — typed collection
+List<Color> palette = [.red, .green, .blue];
+
+// GOOD — return type provides context
+Color defaultColor() => .red;
+
+// BAD — redundant type name when context is clear
+Color myColor = Color.green;       // context already Color
+setColor(Color.red);               // param already Color
+final Color c = Color.blue;        // variable type already Color
+List<Color> p = [Color.red];       // list type already Color
+
+// ERROR — no context type: var/final without annotation
+var myColor = .green;      // type unknown
+final colors = [.red];     // list element type unknown
 ```
 
 ### Static Members with Dot Shorthand
@@ -612,17 +630,18 @@ final priorities = [.low, .high]; // Error: Type missing
 
 ### Best Practices
 
+**MUST (Enum)**
+- Use dot shorthand for **all** enum usages where context type is explicit: assignments, parameters, return values, switch arms, collections, and equality checks.
+- Never write `EnumType.member` when the surrounding context already supplies the enum type.
+
 **DO**
-- Use dot shorthand when the variable, parameter, or return type is explicit.
-- Prefer it in switch expressions/statements and typed collections.
-- Keep shorthands on the right of equality checks.
-- **MUST** use dot shorthand for enum comparisons — writing `MyEnum.value` in `==`/`!=` is forbidden when the left operand already provides the type.
+- Use dot shorthand for non-enum static members when the variable or parameter type is explicit.
+- Keep shorthands on the right of equality checks (`==`/`!=`).
 
 **DON'T**
 - Start statements with dot shorthand.
-- Use it with `var` when the type cannot be inferred.
-- Place it where multiple types could match or readability suffers.
-- Write `EnumType.member` on the right side of `==`/`!=` when comparing enum values.
+- Use it with `var`/`final` when the type cannot be inferred.
+- Place it on the left side of `==`/`!=`.
 
 **Use dot shorthand when** the type context is explicit, unambiguous, and clarity improves.  
 **Avoid it when** inference would fail or teammates might struggle to see the underlying type.
