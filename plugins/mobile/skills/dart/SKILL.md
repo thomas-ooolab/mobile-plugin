@@ -113,6 +113,21 @@ class UserInfo {
 }
 ```
 
+## Linting
+
+This project uses `very_good_analysis` for strict linting. When creating or editing a `pubspec.yaml`, verify it is present — add if missing.
+
+```yaml
+# pubspec.yaml — always use latest version from pub.dev
+dev_dependencies:
+  very_good_analysis: ^<latest>  # check https://pub.dev/packages/very_good_analysis
+```
+
+```yaml
+# analysis_options.yaml
+include: package:very_good_analysis/analysis_options.yaml
+```
+
 ## Reference
 
 | Topic | File |
