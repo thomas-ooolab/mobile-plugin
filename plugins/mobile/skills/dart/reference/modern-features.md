@@ -553,11 +553,19 @@ final points = [.zero()];         // Error: Type inference fails
 
 ### Equality Checks
 
-Dot shorthand **must** appear on the right-hand side of `==`/`!=` so the left side can supply the context type.
+When comparing an enum value with `==` or `!=`, dot shorthand is **required**. The left operand supplies the type context; the right operand **must** use the shorthand.
 
 ```dart
-if (status == .pending || status == .approved) {} // OK
-if (.pending == status) {}                        // Compilation error
+// GOOD — enum comparison with dot shorthand (required)
+if (status == .pending || status == .approved) {}
+if (role != .admin) {}
+
+// BAD — redundant enum type name in comparison
+if (status == Status.pending || status == Status.approved) {}
+if (role != UserRole.admin) {}
+
+// Compilation error — shorthand on wrong side
+if (.pending == status) {} // left side has no context type
 ```
 
 ### Expression Statement Restrictions
@@ -608,11 +616,13 @@ final priorities = [.low, .high]; // Error: Type missing
 - Use dot shorthand when the variable, parameter, or return type is explicit.
 - Prefer it in switch expressions/statements and typed collections.
 - Keep shorthands on the right of equality checks.
+- **MUST** use dot shorthand for enum comparisons — writing `MyEnum.value` in `==`/`!=` is forbidden when the left operand already provides the type.
 
 **DON'T**
 - Start statements with dot shorthand.
 - Use it with `var` when the type cannot be inferred.
 - Place it where multiple types could match or readability suffers.
+- Write `EnumType.member` on the right side of `==`/`!=` when comparing enum values.
 
 **Use dot shorthand when** the type context is explicit, unambiguous, and clarity improves.  
 **Avoid it when** inference would fail or teammates might struggle to see the underlying type.
