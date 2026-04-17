@@ -8,6 +8,7 @@ description: "get_it + injectable DI setup: sl instance, annotations (@injectabl
 - `@clean` - Layer separation, dependency rules, package constraints
 - `@state` - Cubit pattern, BLoC integration with DI
 - `@dart` - Dart language best practices
+- `@pubspec` - Always fetch latest versions from pub.dev before adding dependencies
 
 ## Overview
 
@@ -19,13 +20,14 @@ Projects use **get_it** as the service locator and **injectable** for annotation
 
 ```yaml
 # pubspec.yaml
+# Check https://pub.dev/api/packages/<name> for latest version before adding
 dependencies:
-  get_it: ^8.0.3
-  injectable: ^2.5.0
+  get_it: <latest>
+  injectable: <latest>
 
 dev_dependencies:
-  injectable_generator: ^2.7.0
-  build_runner: ^2.4.14
+  injectable_generator: <latest>
+  build_runner: <latest>
 ```
 
 ### 2. Create Service Locator
@@ -62,13 +64,14 @@ Each package (`data`, `domain`) has its own injectable module using `@Injectable
 
 ```yaml
 # packages/data/pubspec.yaml
+# Check https://pub.dev/api/packages/<name> for latest version before adding
 dependencies:
-  get_it: ^8.0.3
-  injectable: ^2.5.0
+  get_it: <latest>
+  injectable: <latest>
 
 dev_dependencies:
-  injectable_generator: ^2.7.0
-  build_runner: ^2.4.14
+  injectable_generator: <latest>
+  build_runner: <latest>
 ```
 
 ```

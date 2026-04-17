@@ -8,6 +8,7 @@ description: "Cubit/BLoC patterns with flutter_bloc, @freezed states, DataLoadSt
 - `@dart` - Dart language best practices, naming, modern features
 - `@di` - sl, injectable, BlocProvider wiring
 - `@clean` - Layer separation, dependency rules
+- `@pubspec` - Always fetch latest versions from pub.dev before adding dependencies
 
 # Cubit State Management Guidelines
 
@@ -19,18 +20,19 @@ Use `flutter_bloc` + `bloc` for state management. **Cubit is the default** — s
 
 ```yaml
 # pubspec.yaml
+# Check https://pub.dev/api/packages/<name> for latest version before adding
 dependencies:
-  bloc: ^8.0.0
-  flutter_bloc: ^8.0.0
-  equatable: ^2.0.0
-  get_it: ^7.0.0
-  injectable: ^2.0.0
+  bloc: <latest>
+  flutter_bloc: <latest>
+  equatable: <latest>
+  get_it: <latest>
+  injectable: <latest>
 
 dev_dependencies:
-  bloc_test: ^9.0.0
-  mocktail: ^1.0.0
-  build_runner: ^2.0.0
-  injectable_generator: ^2.0.0
+  bloc_test: <latest>
+  mocktail: <latest>
+  build_runner: <latest>
+  injectable_generator: <latest>
 ```
 
 ## Dependency Injection

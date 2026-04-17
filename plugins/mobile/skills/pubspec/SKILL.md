@@ -12,6 +12,9 @@ description: >
 Always use latest stable version from pub.dev. Never pin exact versions or copy
 version strings from docs/examples without verifying.
 
+This applies everywhere — pubspec.yaml files, skill docs, README examples, code
+snippets. Any version string written without first fetching pub.dev is wrong.
+
 ## Fetching Latest Version
 
 Use pub.dev JSON API:
@@ -44,10 +47,13 @@ dependencies:
 
 ## Workflow
 
-1. For each package being added: fetch `https://pub.dev/api/packages/<name>`
+1. For each package: fetch `https://pub.dev/api/packages/<name>`
 2. Extract `latest.version`
-3. Write `^<version>` in pubspec.yaml
+3. Write `^<latest.version>` — never guess or reuse a remembered version
 4. Run `fvm flutter pub get` after editing
+
+When writing versions in skill docs or examples, follow the same rule: fetch
+first, then write. Never write a version from memory.
 
 ## Edge Cases
 
