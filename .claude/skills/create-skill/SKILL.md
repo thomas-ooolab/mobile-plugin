@@ -117,6 +117,7 @@ description: Helps with commits
 | Explaining what PDFs are | Assume Claude knows; just show the code |
 | Nested refs (A→B→C) | All refs link from SKILL.md directly |
 | Time-based conditionals | "Current method" + collapsible "Old patterns" section |
+| Emoji anywhere in content | Plain words — `// GOOD` / `// BAD`, `CRITICAL:`, `WARNING:` not `✅`/`❌`/`⚠️` |
 
 ## MCP Tool References
 

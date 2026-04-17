@@ -338,7 +338,7 @@ abstract class AppModule {
 Use `sl<T>()` inside `BlocProvider.create` to resolve dependencies. Never use `context.read<T>()` for repositories/use cases.
 
 ```dart
-// ✅ CORRECT
+// CORRECT
 BlocProvider(
   create: (_) => FeatureCubit(
     repository: sl<FeatureRepository>(),
@@ -347,13 +347,13 @@ BlocProvider(
   child: const FeatureScreen(),
 )
 
-// ❌ WRONG — never resolve sl<T>() outside BlocProvider.create
+// BAD — never resolve sl<T>() outside BlocProvider.create
 Widget build(BuildContext context) {
   final repository = sl<FeatureRepository>(); // resolves every build
   ...
 }
 
-// ❌ WRONG — never use context.read for repositories/use cases
+// BAD — never use context.read for repositories/use cases
 final repository = context.read<Repository>();
 ```
 

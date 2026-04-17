@@ -150,35 +150,35 @@ lib/screens/assignments/
 - **DON'T** export internal implementation details (forms, helpers, sub-components used only within the folder)
 
 ```dart
-// ✅ GOOD - lib/screens/billing/cubit/cubit.dart
+// GOOD - lib/screens/billing/cubit/cubit.dart
 // State is read by view/ outside this folder — export both
 export 'billing_cubit.dart';
 export 'billing_state.dart';
 
-// ✅ GOOD - lib/screens/billing/view/view.dart
+// GOOD - lib/screens/billing/view/view.dart
 // Screen used by route — export it; invoice_item used by parent feature — export it
 export 'billing_screen.dart';
 export 'invoice_item.dart';
 
-// ❌ BAD - lib/screens/login/view/view.dart
+// BAD - lib/screens/login/view/view.dart
 export 'login_screen.dart';
 export 'login_form.dart';               // only used inside login_screen — do not export
 export 'login_header.dart';             // only used inside login_screen — do not export
 
-// ✅ GOOD - lib/screens/billing/model/model.dart
+// GOOD - lib/screens/billing/model/model.dart
 // Only export models referenced outside this folder
 export 'billing_detail_data.dart';
 // invoice_status_helper.dart used only inside model/ — not exported
 
-// ✅ GOOD - lib/screens/billing/billing_detail/billing_detail.dart
+// GOOD - lib/screens/billing/billing_detail/billing_detail.dart
 export 'model/model.dart' show BillingDetailData;  // only the type needed by callers
 
-// ❌ BAD - No barrel file
+// BAD - No barrel file
 // Forces consumers to know internal structure:
 // import '../../screens/billing/cubit/billing_cubit.dart';
 // import '../../screens/billing/view/billing_screen.dart';
 
-// ✅ GOOD - With barrel files, clean imports:
+// GOOD - With barrel files, clean imports:
 // import 'package:app/screens/[feature]/[feature].dart';
 ```
 
@@ -352,10 +352,10 @@ class FeatureRoute extends AppPageRoute<FeatureData, FeatureResult> {
 - Cubit's own deps wired by injectable — do not pass them manually through the route
 
 ```dart
-// ✅ CORRECT
+// CORRECT
 BlocProvider(create: (_) => sl<FeatureCubit>())
 
-// ❌ WRONG
+// BAD
 BlocProvider(create: (_) => FeatureCubit(repository: sl<FeatureRepository>()))
 ```
 

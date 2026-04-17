@@ -16,7 +16,7 @@
 
 - **DO** use Widget classes for ALL reusable UI components.
 ```dart
-// ✅ GOOD - Widget class enables const optimization and hot reload
+// GOOD - Widget class enables const optimization and hot reload
 class PrimaryButton extends StatelessWidget {
   const PrimaryButton({
     required this.text,
@@ -53,7 +53,7 @@ const PrimaryButton(
 
 - **DON'T** use build methods for reusable widgets.
 ```dart
-// ❌ BAD - Build method prevents const optimization and breaks hot reload
+// BAD - Build method prevents const optimization and breaks hot reload
 Widget _buildPrimaryButton({
   required String text,
   required VoidCallback? onPressed,
@@ -232,7 +232,7 @@ class _ExpandableCardState extends State<ExpandableCard> {
 
 - **DON'T** use StatefulWidget for business logic (use BLoC/Cubit per `@state`).
 ```dart
-// ❌ BAD - StatefulWidget managing business logic
+// BAD - StatefulWidget managing business logic
 class UserListScreen extends StatefulWidget {
   const UserListScreen({super.key});
 
@@ -247,18 +247,18 @@ class _UserListScreenState extends State<UserListScreen> {
   @override
   void initState() {
     super.initState();
-    _loadUsers(); // ❌ Business logic in widget!
+    _loadUsers(); // BAD: business logic in widget!
   }
 
   Future<void> _loadUsers() async {
     setState(() => _isLoading = true);
-    _users = await userRepository.getUsers(); // ❌ Direct repository call!
+    _users = await userRepository.getUsers(); // BAD: direct repository call!
     setState(() => _isLoading = false);
   }
   // ...
 }
 
-// ✅ GOOD - Use BLoC/Cubit for business logic (see @state)
+// GOOD - Use BLoC/Cubit for business logic (see @state)
 class UserListScreen extends StatelessWidget {
   const UserListScreen({super.key});
 
@@ -266,7 +266,7 @@ class UserListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => UserListCubit(
-        userRepository: sl<UserRepository>(), // ✅ Service locator
+        userRepository: sl<UserRepository>(), // GOOD: service locator
       )..loadUsers(),
       child: const UserListView(),
     );
@@ -357,7 +357,7 @@ class ProductInfo extends StatelessWidget {
 
 - **AVOID** deeply nested widget trees without extraction.
 ```dart
-// ❌ BAD - Deeply nested, hard to read and maintain
+// BAD - Deeply nested, hard to read and maintain
 @override
 Widget build(BuildContext context) {
   return Card(
@@ -387,7 +387,7 @@ Widget build(BuildContext context) {
   );
 }
 
-// ✅ GOOD - Extracted into focused widget classes
+// GOOD - Extracted into focused widget classes
 @override
 Widget build(BuildContext context) {
   return Card(

@@ -41,17 +41,17 @@ brew install fvm
 fvm --version
 ```
 
-### ⚠️ CRITICAL: Always Use FVM
+### CRITICAL: Always Use FVM
 
 **ALL Flutter and Dart commands MUST be prefixed with `fvm`:**
 
 ```bash
-# ✅ CORRECT - With FVM prefix
+# CORRECT - With FVM prefix
 fvm flutter run
 fvm flutter pub get
 fvm dart run build_runner build
 
-# ❌ WRONG - Without FVM prefix
+# BAD - Without FVM prefix
 flutter run           # DON'T DO THIS
 flutter pub get       # DON'T DO THIS
 dart run build_runner # DON'T DO THIS
@@ -244,7 +244,7 @@ fvm dart format --set-exit-if-changed .
 
 ## Tools and Commands
 
-**⚠️ REMINDER:** All Flutter/Dart commands AND Melos commands require the `fvm` prefix.
+**REMINDER:** All Flutter/Dart commands AND Melos commands require the `fvm` prefix.
 
 ### Common Commands
 

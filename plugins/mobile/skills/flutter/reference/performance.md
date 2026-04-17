@@ -62,7 +62,7 @@ ListView.builder(
   },
 );
 
-// ❌ Bad - Creates all widgets at once
+// BAD - Creates all widgets at once
 ListView(
   children: users.map((user) => UserCard(user: user)).toList(),
 );
@@ -112,17 +112,17 @@ CachedNetworkImage(
 
 - **DON'T** create widgets in variables within build method.
 ```dart
-// ❌ BAD - Widget created in variable, rebuilt every time
+// BAD - Widget created in variable, rebuilt every time
 @override
 Widget build(BuildContext context) {
   final header = Container(
     child: Text('Header'),
-  ); // ❌ Created on every build!
+  ); // BAD: created on every build!
 
   return Column(children: [header, body]);
 }
 
-// ✅ GOOD - Widget class with const
+// GOOD - Widget class with const
 @override
 Widget build(BuildContext context) {
   return const Column(

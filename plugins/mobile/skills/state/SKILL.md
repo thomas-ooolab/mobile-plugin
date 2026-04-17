@@ -283,5 +283,5 @@ Future<void> loadFeature() async {
 |-------|------|
 | Advanced cubit patterns (safeEmit, refresh, form, multi, singleton) | [reference/cubit.md](reference/cubit.md) |
 | Testing cubits with bloc_test | [reference/testing.md](reference/testing.md) |
-| Common mistakes (❌/✅ pairs) | [reference/common-mistakes.md](reference/common-mistakes.md) |
+| Common mistakes (BAD/GOOD pairs) | [reference/common-mistakes.md](reference/common-mistakes.md) |
 ```

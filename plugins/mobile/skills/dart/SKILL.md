@@ -15,6 +15,29 @@ This project uses FVM (Flutter Version Management). Always prefix Dart commands 
 
 ## Key Principles
 
+### Documentation (Always Required)
+
+Every public API **must** have a `///` doc comment. Every piece of non-obvious private logic **must** have an inline `//` comment explaining *why*, not *what*.
+
+```dart
+// GOOD: Public API — full dartdoc comment
+/// Fetches the user's profile from the remote API.
+///
+/// Throws [NetworkException] if the device is offline.
+/// Throws [AuthException] if the [token] has expired.
+Future<UserProfile> fetchProfile({required String token}) async { ... }
+
+// GOOD: Complex private logic — explain the why
+// Cap at 30 s because the server rate-limits to 10 req/min; aggressive
+// retries make the problem worse, so we back off to let the window reset.
+Future<void> _retryWithBackoff(Future<void> Function() action) async { ... }
+
+// BAD: No doc on a public method
+Future<UserProfile> fetchProfile({required String token}) async { ... }
+```
+
+Reference: [dartdoc documentation](https://pub.dev/documentation/dartdoc/latest/) — full guide in [reference/code-style.md](reference/code-style.md#documentation--comments).
+
 ### Modern Dart Features (Dart 3.0+)
 1. **Use Patterns and Destructuring** - Extract multiple values concisely
 2. **Use Named Parameters** - Make constructors and methods self-documenting
@@ -30,13 +53,13 @@ This project uses FVM (Flutter Version Management). Always prefix Dart commands 
 `static const` holds data in static memory for the app's entire lifetime. For collections containing non-primitive objects (widget configs, icon defs, etc.), use `late final` — initialized once per instance, freed when the object is GC'd.
 
 ```dart
-// ❌ BAD — static storage lives forever, all _TabDef objects pinned in memory
+// BAD — static storage lives forever, all _TabDef objects pinned in memory
 static const _tabs = <_TabDef>[
   _TabDef(label: 'Home', icon: Icons.grid_view_rounded),
   _TabDef(label: 'Calls', icon: Icons.phone_outlined),
 ];
 
-// ✅ GOOD — lazy, tied to instance lifecycle
+// GOOD — lazy, tied to instance lifecycle
 late final _tabs = <_TabDef>[
   _TabDef(label: 'Home', icon: Icons.grid_view_rounded),
   _TabDef(label: 'Calls', icon: Icons.phone_outlined),

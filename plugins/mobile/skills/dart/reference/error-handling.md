@@ -152,7 +152,12 @@ for (final user in users) {
 - Use `lowerCamelCase` for members
 - Use `lowercase_with_underscores` for libraries
 - Format code with `fvm dart format`
-- Document all public APIs
+- Document **every** public API — classes, constructors, fields, methods, getters, typedefs
+- Document complex private logic with `//` inline comments explaining *why*
+- Use `///` triple-slash for all doc comments; never `/** */`
+- Write the first doc-comment sentence as a standalone summary (dartdoc uses it as hover text)
+- Use `[SymbolName]` cross-references in doc comments to link related types and methods
+- List every exception a public method can throw in its doc comment
 - Use collection literals
 - Use `final` for variables that won't change
 - Use tear-offs when possible

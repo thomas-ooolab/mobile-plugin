@@ -102,4 +102,5 @@ Subdirectories create namespaced commands:
 - [ ] Bash commands in backtick+! syntax: `!command`
 - [ ] File refs use @ prefix: @path/to/file
 - [ ] Command appears in / picker after creation
+- [ ] No emoji — use plain words (GOOD/BAD, CRITICAL:, WARNING:) instead of ✅/❌/⚠️
 ```

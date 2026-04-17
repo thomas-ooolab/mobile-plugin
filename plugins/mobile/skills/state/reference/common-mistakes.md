@@ -1,20 +1,20 @@
 # Common Mistakes
 
-## ❌ Manual GetIt call inside Cubit
+## BAD: Manual GetIt call inside Cubit
 
 ```dart
-// ❌ BAD
+// BAD
 class FeatureCubit extends Cubit<FeatureState> {
   FeatureCubit() : super(const FeatureState());
 
-  final _repository = sl<FeatureRepository>(); // ❌ hidden dep
+  final _repository = sl<FeatureRepository>(); // BAD: hidden dep
 }
 ```
 
-## ✅ Constructor injection with `@injectable`
+## GOOD: Constructor injection with `@injectable`
 
 ```dart
-// ✅ GOOD
+// GOOD
 @injectable
 class FeatureCubit extends Cubit<FeatureState> {
   FeatureCubit(this._repository) : super(const FeatureState());
@@ -24,20 +24,20 @@ class FeatureCubit extends Cubit<FeatureState> {
 
 ---
 
-## ❌ Resolving cubit outside `create`
+## BAD: Resolving cubit outside `create`
 
 ```dart
-// ❌ BAD - resolved every build
+// BAD - resolved every build
 Widget build(BuildContext context) {
   final cubit = sl<FeatureCubit>();
   return BlocProvider.value(value: cubit, child: ...);
 }
 ```
 
-## ✅ Resolve inside `BlocProvider.create`
+## GOOD: Resolve inside `BlocProvider.create`
 
 ```dart
-// ✅ GOOD
+// GOOD
 BlocProvider(
   create: (_) => sl<FeatureCubit>()..loadFeature(),
   child: const FeatureView(),
@@ -46,29 +46,29 @@ BlocProvider(
 
 ---
 
-## ❌ Positional constructor params
+## BAD: Positional constructor params
 
 ```dart
-// ❌ BAD
+// BAD
 FeatureCubit(FeatureRepository repository) : _repository = repository, super(...);
 ```
 
-## ✅ Named or single-positional with field init
+## GOOD: Named or single-positional with field init
 
 ```dart
-// ✅ GOOD (named — required by bloc_lint for multi-param)
+// GOOD (named — required by bloc_lint for multi-param)
 FeatureCubit({required FeatureRepository repository}) : _repository = repository, super(...);
 
-// ✅ GOOD (single-param positional with @injectable field)
+// GOOD (single-param positional with @injectable field)
 FeatureCubit(this._repository) : super(...);
 ```
 
 ---
 
-## ❌ Union/sealed state — loses data on transition
+## BAD: Union/sealed state — loses data on transition
 
 ```dart
-// ❌ BAD — switching from loaded→loading discards features
+// BAD — switching from loaded→loading discards features
 @freezed
 sealed class FeatureState with _$FeatureState {
   const factory FeatureState.initial() = FeatureInitial;
@@ -79,10 +79,10 @@ sealed class FeatureState with _$FeatureState {
 // emit(FeatureLoading()) → features gone, can't show stale data
 ```
 
-## ✅ Single state class + DataLoadStatus — data persists
+## GOOD: Single state class + DataLoadStatus — data persists
 
 ```dart
-// ✅ GOOD — copyWith preserves features across re-loads
+// GOOD — copyWith preserves features across re-loads
 import 'package:app/core/state-management/state_management.dart';
 
 @freezed
@@ -98,18 +98,18 @@ class FeatureState with _$FeatureState {
 
 ---
 
-## ❌ Cubit with no DI annotation
+## BAD: Cubit with no DI annotation
 
 ```dart
-// ❌ BAD — not registered in DI graph
+// BAD — not registered in DI graph
 class FeatureCubit extends Cubit<FeatureState> {
   FeatureCubit(this._repository) : super(const FeatureState());
 ```
 
-## ✅ Cubit annotated for DI
+## GOOD: Cubit annotated for DI
 
 ```dart
-// ✅ GOOD — @injectable for feature cubits, @singleton for app-wide
+// GOOD — @injectable for feature cubits, @singleton for app-wide
 @injectable
 class FeatureCubit extends Cubit<FeatureState> {
   FeatureCubit(this._repository) : super(const FeatureState());
@@ -117,16 +117,16 @@ class FeatureCubit extends Cubit<FeatureState> {
 
 ---
 
-## ❌ Public mock classes
+## BAD: Public mock classes
 
 ```dart
-// ❌ BAD
+// BAD
 class MockFeatureRepository extends Mock implements FeatureRepository {}
 ```
 
-## ✅ Private mock classes
+## GOOD: Private mock classes
 
 ```dart
-// ✅ GOOD
+// GOOD
 class _MockFeatureRepository extends Mock implements FeatureRepository {}
 ```
