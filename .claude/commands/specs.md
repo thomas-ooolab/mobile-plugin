@@ -38,12 +38,12 @@ Complex plan (wait for confirm): 3+ files, any existing file updated, or require
 
 ## Step 3 — Implement
 
-After user confirms, create each artifact. Load only the guide matching the artifact type being created:
+After user confirms, create each artifact. Load only the guide for the artifact type(s) in the plan:
 
-- Creating a Rule → load @.claude/skills/create-rule/SKILL.md
-- Creating a Command → load @.claude/skills/create-command/SKILL.md
-- Creating a Skill → load @.claude/skills/create-skill/SKILL.md
-- Creating an Agent → load @.claude/skills/create-agent/SKILL.md
+- Creating or modifying a Rule → @create-rule
+- Creating or modifying a Command → @create-command
+- Creating or modifying a Skill → @create-skill
+- Creating or modifying an Agent → @create-agent
 
 Do not load guides for artifact types not in the plan.
 

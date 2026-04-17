@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "OOOLab AI plugin marketplace \u2014 shared rules, skills, agents, and commands for mobile, backend, and frontend projects",
-    "version": "0.2.2",
+    "version": "0.2.3",
     "pluginRoot": "plugins"
   },
   "plugins": [
