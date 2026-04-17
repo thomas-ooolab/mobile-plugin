@@ -90,7 +90,57 @@ listener: (__, state) => doSomething(state),
 ```
 Use one `_` per unused slot; you can repeat `_` for multiple unused parameters (e.g. `(_, _)`), but each name must be a single underscore, not `__`.
 
-## Acronyms and Abbreviations
+## Descriptive Names — No Abbreviations
+
+- **DO** use full, descriptive names for all variables, fields, parameters, and members. Never shorten names to save keystrokes — abbreviated names hide intent and force readers to decode meaning.
+
+```dart
+// Good
+Color get foregroundColor => _theme.primaryColor;
+Color get backgroundColor => _theme.surfaceColor;
+Widget get submitButton => ElevatedButton(onPressed: _submit, child: const Text('Submit'));
+String get labelText => _controller.labelText;
+VoidCallback get onValueChanged => _handleValueChanged;
+final TextEditingController emailController = TextEditingController();
+
+// Bad — single-letter or truncated abbreviations
+Color get _fg => _theme.primaryColor;       // fg = foreground?
+Color get _bg => _theme.surfaceColor;       // bg = background?
+Widget get _btn => ElevatedButton(...);     // btn = button?
+String get _lbl => _controller.labelText;  // lbl = label?
+VoidCallback get _cb => _handleValueChanged; // cb = callback?
+final TextEditingController _ctrl = TextEditingController(); // ctrl = controller?
+```
+
+Common abbreviations to **avoid** — always spell them out:
+
+| Avoid | Use instead |
+|-------|-------------|
+| `fg` | `foregroundColor` |
+| `bg` | `backgroundColor` |
+| `btn` | `button` |
+| `lbl` | `label` / `labelText` |
+| `txt` | `text` |
+| `img` | `image` |
+| `cb` | `callback` |
+| `val` | `value` |
+| `ctrl` | `controller` |
+| `mgr` | `manager` |
+| `cfg` | `config` / `configuration` |
+| `err` | `error` |
+| `msg` | `message` |
+| `idx` | `index` |
+| `len` | `length` |
+| `pos` | `position` |
+| `sz` | `size` |
+| `w` / `h` | `width` / `height` |
+| `ctx` | `context` |
+| `prev` | `previous` |
+| `curr` | `current` |
+
+**Exception:** loop variables in very short, obvious scopes (`i`, `j` in a numeric loop) are acceptable only when the scope is a handful of lines and the meaning is self-evident from context.
+
+## Acronyms and Abbreviations in Type Names
 - **DO** capitalize acronyms and abbreviations longer than two letters like words.
 ```dart
 // Good

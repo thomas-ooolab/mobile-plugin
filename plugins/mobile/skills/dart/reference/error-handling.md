@@ -188,6 +188,7 @@ for (final user in users) {
 - Use exceptions for control flow
 - Use getters for expensive operations
 - Redundantly annotate local variable types
+- Use abbreviated variable names — write `foregroundColor`, not `_fg`; `backgroundColor`, not `_bg`; `controller`, not `ctrl`; `callback`, not `cb` (see naming-conventions.md for full list)
 
 ### PREFER
 - Making fields `final`
