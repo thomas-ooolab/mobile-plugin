@@ -6,7 +6,7 @@ Get current git state:
 `!git diff`
 `!git status --short`
 
-Follow the rules in @.agents/skills/caveman-commit/SKILL.md to generate a commit message from the changes above.
+Use /caveman:caveman-commit to generate a commit message from the changes above.
 
 Then execute these steps in order:
 
