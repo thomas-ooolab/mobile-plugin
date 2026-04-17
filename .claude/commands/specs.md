@@ -55,4 +55,4 @@ If violations found:
 
 If violations remain → repeat Step 4 until clean.
 
-Once all checks pass: ask user "All issues resolved — run /commit?" If confirmed, run `/commit`.
+Once all checks pass: run `/commit` automatically.
