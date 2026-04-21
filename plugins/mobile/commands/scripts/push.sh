@@ -75,9 +75,9 @@ should_format_code() {
         # Allowed directories:
         # - lib/
         # - test/
-        # - packages/**/lib/
-        # - packages/**/test/
-        if [[ "${file}" == lib/* ]] || [[ "${file}" == test/* ]] || [[ "${file}" =~ ^packages/.*/lib/ ]] || [[ "${file}" =~ ^packages/.*/test/ ]]; then
+        # - <package>/lib/   (e.g. data/lib/, domain/lib/)
+        # - <package>/test/  (e.g. data/test/, domain/test/)
+        if [[ "${file}" == lib/* ]] || [[ "${file}" == test/* ]] || [[ "${file}" =~ ^[^/]+/lib/ ]] || [[ "${file}" =~ ^[^/]+/test/ ]]; then
             continue
         fi
         # If any changed path is outside the allowed directories, skip formatting.
@@ -224,7 +224,7 @@ main() {
     if should_format_code; then
         format_code || exit 1
     else
-        info "Skipping dart format (changes are outside lib/, test/, packages/**/lib/, packages/**/test/)"
+        info "Skipping dart format (changes are outside lib/, test/, <pkg>/lib/, <pkg>/test/)"
     fi
 
     local commit_message
