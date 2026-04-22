@@ -1,71 +1,8 @@
 # Unit Testing
 
-## Table of Contents
-- [Cubit Testing](#cubit-testing)
-- [Repository Testing](#repository-testing)
-
----
-
 ## Cubit Testing
 
-Use `bloc_test` package for testing Cubits:
-
-```dart
-import 'package:bloc_test/bloc_test.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:flutter_test/flutter_test.dart';
-
-// Define private mock classes in the test file
-class _MockFeatureRepository extends Mock implements FeatureRepository {}
-
-void main() {
-  group('FeatureCubit', () {
-    late FeatureCubit featureCubit;
-    late _MockFeatureRepository mockRepository;
-    
-    setUp(() {
-      mockRepository = _MockFeatureRepository();
-      featureCubit = FeatureCubit(mockRepository);
-    });
-    
-    tearDown(() {
-      featureCubit.close();
-    });
-    
-    test('initial state has status initial', () {
-      expect(featureCubit.state.status, equals(DataLoadStatus.initial));
-    });
-    
-    blocTest<FeatureCubit, FeatureState>(
-      'emits [loading, success] when loadFeatures succeeds',
-      build: () {
-        when(() => mockRepository.getFeatures())
-            .thenAnswer((_) async => []);
-        return featureCubit;
-      },
-      act: (cubit) => cubit.loadFeatures(),
-      expect: () => [
-        FeatureState(status: DataLoadStatus.loading),
-        FeatureState(status: DataLoadStatus.success),
-      ],
-    );
-    
-    blocTest<FeatureCubit, FeatureState>(
-      'emits [loading, failure] when repository throws exception',
-      build: () {
-        when(() => mockRepository.getFeatures())
-            .thenThrow(Exception('Network error'));
-        return featureCubit;
-      },
-      act: (cubit) => cubit.loadFeatures(),
-      expect: () => [
-        FeatureState(status: DataLoadStatus.loading),
-        FeatureState(status: DataLoadStatus.failure),
-      ],
-    );
-  });
-}
-```
+See [`@state` → reference/testing.md](../../state/reference/testing.md) — canonical cubit test patterns (`bloc_test`, `mocktail`, private mocks, `blocTest`, `verify`).
 
 ---
 
@@ -104,11 +41,9 @@ void main() {
     });
     
     test('throws exception when service fails', () async {
-      // Arrange
       when(() => mockRemoteDataSource.getFeatures())
           .thenThrow(Exception('Network error'));
       
-      // Act & Assert
       expect(
         () => repository.getFeatures(),
         throwsA(isA<Exception>()),

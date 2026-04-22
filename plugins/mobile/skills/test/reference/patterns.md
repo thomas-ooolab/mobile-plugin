@@ -21,6 +21,16 @@
 
 ## 1. Test Organization
 
+**File placement:** `test/` mirrors `lib/`. Place the test at the same relative path, replacing `lib/` with `test/` and appending `_test` to the filename.
+
+```
+lib/screens/feature/feature_screen.dart  →  test/screens/feature/feature_screen_test.dart
+lib/core/utils/date_utils.dart           →  test/core/utils/date_utils_test.dart
+```
+
+Test-only dirs (`mocks/`, `test_helpers/`) have no `lib/` counterpart — place them at `test/` root.
+
+**Test structure:**
 - Use `group()` to organize related tests
 - Use descriptive test names that describe behavior
 - Follow AAA pattern: Arrange, Act, Assert
@@ -68,6 +78,8 @@ testWidgets('should display error message when state is failure', ...);
 
 ## 4. setUp and tearDown
 
+No need to call `cubit.close()` in `tearDown` — `bloc_test` handles cleanup automatically after each `blocTest`.
+
 ```dart
 void main() {
   group('FeatureTest', () {
@@ -83,12 +95,7 @@ void main() {
     setUp(() {
       // Setup before each test
       mockRepository = MockRepository();
-      cubit = FeatureCubit(mockRepository);
-    });
-    
-    tearDown(() {
-      // Cleanup after each test
-      cubit.close();
+      cubit = FeatureCubit(repository: mockRepository);
     });
   });
 }

@@ -20,8 +20,6 @@ void main() {
       cubit = FeatureCubit(repository: repository);
     });
 
-    tearDown(() => cubit.close());
-
     test('initial state has status initial', () {
       expect(cubit.state.status, equals(DataLoadStatus.initial));
     });

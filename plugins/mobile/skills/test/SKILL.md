@@ -25,18 +25,31 @@ The project follows a comprehensive testing strategy with multiple testing layer
 ## Test Structure
 
 ### Directory Organization
+
+`test/` mirrors `lib/`. A test file lives at the same relative path as the code it tests — only the root changes from `lib/` to `test/` and the filename gains `_test`.
+
+```
+lib/screens/feature/feature_screen.dart
+→ test/screens/feature/feature_screen_test.dart
+
+lib/core/utils/date_utils.dart
+→ test/core/utils/date_utils_test.dart
+```
+
+Test-only directories (no `lib/` counterpart) live at the root of `test/`:
+
 ```
 test/
-├── components/          # Component tests (broadcast, pagination, etc.)
-├── core/               # Core functionality tests
-├── localization/       # Localization tests
-├── mixin/             # Mixin tests
-├── mocks/             # Shared mock objects
-├── screens/           # Screen tests
-├── test_helpers/      # Testing utilities and extensions
-├── use_case/          # Use case tests
-├── utils/             # Utility tests
-└── widgets/           # Reusable widget tests
+├── components/          # mirrors lib/components/
+├── core/               # mirrors lib/core/
+├── localization/       # mirrors lib/localization/
+├── mixin/             # mirrors lib/mixin/
+├── screens/           # mirrors lib/screens/
+├── use_case/          # mirrors lib/use_case/
+├── utils/             # mirrors lib/utils/
+├── widgets/           # mirrors lib/widgets/
+├── mocks/             # test-only: shared mock objects
+└── test_helpers/      # test-only: utilities and extensions
 ```
 
 ## Reference Documentation
@@ -44,7 +57,7 @@ test/
 | Topic | File | What's inside |
 |-------|------|---------------|
 | `pumpWidgetWithMaterialApp`, pagination, timezone, translations, WebView setup | [`reference/test-helpers.md`](reference/test-helpers.md) | All test helper utilities with usage examples |
-| Cubit testing with `bloc_test`, repository testing | [`reference/unit-testing.md`](reference/unit-testing.md) | Unit test patterns with full examples |
+| Cubit testing → see `@state` skill; repository testing | [`reference/unit-testing.md`](reference/unit-testing.md) | Repository test patterns; cubit tests → `@state/reference/testing.md` |
 | Screen tests with Cubit, pagination widgets, simple widget tests | [`reference/widget-testing.md`](reference/widget-testing.md) | Widget test patterns |
 | Mock classes, fallback values, `when`/`thenAnswer`, `whenListen`, verify | [`reference/mocking.md`](reference/mocking.md) | Full mocking reference |
 | Test organization, naming, AAA, setUp/tearDown, coverage, async, all state patterns | [`reference/patterns.md`](reference/patterns.md) | Best practices + common patterns (error, loading, empty, input, scroll) |
