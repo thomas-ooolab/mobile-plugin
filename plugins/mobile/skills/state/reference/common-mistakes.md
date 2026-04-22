@@ -17,7 +17,9 @@ class FeatureCubit extends Cubit<FeatureState> {
 // GOOD
 @injectable
 class FeatureCubit extends Cubit<FeatureState> {
-  FeatureCubit(this._repository) : super(const FeatureState());
+  FeatureCubit({required FeatureRepository repository})
+      : _repository = repository,
+        super(const FeatureState());
   final FeatureRepository _repository;
 }
 ```
@@ -53,14 +55,13 @@ BlocProvider(
 FeatureCubit(FeatureRepository repository) : _repository = repository, super(...);
 ```
 
-## GOOD: Named or single-positional with field init
+## GOOD: Named params
 
 ```dart
-// GOOD (named — required by bloc_lint for multi-param)
-FeatureCubit({required FeatureRepository repository}) : _repository = repository, super(...);
-
-// GOOD (single-param positional with @injectable field)
-FeatureCubit(this._repository) : super(...);
+// GOOD — named params always, even single-param
+FeatureCubit({required FeatureRepository repository})
+    : _repository = repository,
+      super(...);
 ```
 
 ---
@@ -112,7 +113,10 @@ class FeatureCubit extends Cubit<FeatureState> {
 // GOOD — @injectable for feature cubits, @singleton for app-wide
 @injectable
 class FeatureCubit extends Cubit<FeatureState> {
-  FeatureCubit(this._repository) : super(const FeatureState());
+  FeatureCubit({required FeatureRepository repository})
+      : _repository = repository,
+        super(const FeatureState());
+  final FeatureRepository _repository;
 ```
 
 ---

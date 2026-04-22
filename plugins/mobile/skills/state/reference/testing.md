@@ -17,7 +17,7 @@ void main() {
 
     setUp(() {
       repository = _MockFeatureRepository();
-      cubit = FeatureCubit(repository);
+      cubit = FeatureCubit(repository: repository);
     });
 
     tearDown(() => cubit.close());

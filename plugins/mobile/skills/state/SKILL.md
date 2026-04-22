@@ -64,7 +64,9 @@ import 'package:injectable/injectable.dart';
 
 @injectable  // use @singleton for app-wide cubits
 class FeatureCubit extends Cubit<FeatureState> {
-  FeatureCubit(this._repository) : super(const FeatureState());
+  FeatureCubit({required FeatureRepository repository})
+      : _repository = repository,
+        super(const FeatureState());
 
   final FeatureRepository _repository;
 

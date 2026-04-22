@@ -16,7 +16,9 @@ Use `CubitMixin<State>` from `core/state_management` to get `safeEmit` — guard
 ```dart
 @injectable
 class FeatureCubit extends Cubit<FeatureState> with CubitMixin<FeatureState> {
-  FeatureCubit(this._repository) : super(const FeatureState());
+  FeatureCubit({required FeatureRepository repository})
+      : _repository = repository,
+        super(const FeatureState());
 
   final FeatureRepository _repository;
 
@@ -95,7 +97,9 @@ class LoginState with _$LoginState {
 // login_cubit.dart
 @injectable
 class LoginCubit extends Cubit<LoginState> with CubitMixin<LoginState> {
-  LoginCubit(this._authRepository) : super(const LoginState());
+  LoginCubit({required AuthenticationRepository authRepository})
+      : _authRepository = authRepository,
+        super(const LoginState());
 
   final AuthenticationRepository _authRepository;
 
@@ -182,7 +186,9 @@ class NavigationCubit extends Cubit<NavigationState> with CubitMixin<NavigationS
 // app_cubit.dart
 @singleton
 class AppCubit extends Cubit<AppState> with CubitMixin<AppState> {
-  AppCubit(this._authRepository) : super(const AppState());
+  AppCubit({required AuthenticationRepository authRepository})
+      : _authRepository = authRepository,
+        super(const AppState());
 
   final AuthenticationRepository _authRepository;
 
