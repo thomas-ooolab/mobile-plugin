@@ -19,9 +19,14 @@ This repository is **indexed by GitNexus**. For anything that depends on underst
 
 1. **Update `release-notes.txt`**
    - If a ticket ID was provided, set the content to the issue tracker URL (e.g. `https://<your-tracker>/browse/<ticket_ID>`).
-   - If no ticket ID was provided, ask the user: "What is the ticket ID for this task? (Enter the ID, or type 'skip' to skip this step.)"
-     - If the user provides an ID, set `release-notes.txt` to the corresponding issue tracker URL.
-     - If the user types `skip` or declines, leave `release-notes.txt` unchanged and skip step 2 as well — proceed directly to step 3.
+   - If no ticket ID was provided, show an interactive selection prompt the user navigates with arrow keys and confirms with Enter:
+     ```
+     No ticket ID provided. What would you like to do?
+     > Enter ticket ID
+       Skip (also skips branch creation in step 2)
+     ```
+     - If the user selects "Enter ticket ID", prompt for text input, then set `release-notes.txt` to the corresponding issue tracker URL.
+     - If the user selects "Skip", leave `release-notes.txt` unchanged and skip step 2 — proceed directly to step 3.
 
 2. **Create a new branch**  
    Follow branch naming and type conventions in `@workflow`. Example: new feature → branch `feat/PROJ-123` from the target branch.
@@ -29,7 +34,7 @@ This repository is **indexed by GitNexus**. For anything that depends on underst
 
 3. **Implement the requirements**  
    Based on the provided requirements and your analysis, implement the work (delegate to subagents when the task matches the table below).
-   - Before starting implementation, if you have any concerns (ambiguous requirements, conflicting constraints, unclear scope, risky changes), pause and present your suggestions to the user as numbered options. Let the user choose which approach to take. Do not proceed until the user has selected an option or confirmed your proposed approach.
+   - Before starting implementation, if you have any concerns (ambiguous requirements, conflicting constraints, unclear scope, risky changes), pause and present your suggestions as an interactive selection prompt: display the options as a list the user can navigate with arrow keys and confirm with Enter. Do not proceed until the user has selected an option.
 
 4. **After finishing code changes: MUST use `/test-writer`**  
    Invoke the test-writer subagent to add or update the test suite for the changes. Do not consider the task complete until tests have been written or updated for the modified code.
