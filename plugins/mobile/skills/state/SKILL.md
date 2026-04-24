@@ -61,9 +61,10 @@ Quick reference for cubits:
 // feature_cubit.dart
 import 'package:bloc/bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:app/core/state_management/state_management.dart';
 
 @injectable  // use @singleton for app-wide cubits
-class FeatureCubit extends Cubit<FeatureState> {
+class FeatureCubit extends Cubit<FeatureState> with CubitMixin<FeatureState> {
   FeatureCubit({required FeatureRepository repository})
       : _repository = repository,
         super(const FeatureState());
@@ -71,26 +72,25 @@ class FeatureCubit extends Cubit<FeatureState> {
   final FeatureRepository _repository;
 
   Future<void> loadFeature() async {
-    emit(state.copyWith(status: DataLoadStatus.loading));
+    safeEmit(state.copyWith(status: DataLoadStatus.loading));
     try {
       final features = await _repository.getFeatures();
-      emit(state.copyWith(status: DataLoadStatus.success, features: features));
+      safeEmit(state.copyWith(status: DataLoadStatus.success, features: features));
     } catch (e) {
-      emit(state.copyWith(status: DataLoadStatus.failure, errorMessage: e.toString()));
+      safeEmit(state.copyWith(status: DataLoadStatus.failure, errorMessage: e.toString()));
     }
   }
 
-  void reset() => emit(const FeatureState());
+  void reset() => safeEmit(const FeatureState());
 }
 ```
 
 **Rules:**
 - Annotate with `@injectable` (feature cubits) or `@singleton` (app-wide cubits) — required for DI wiring
-- Extend `Cubit<State>` from `bloc` package
+- Extend `Cubit<State>` from `bloc` package; mix in `CubitMixin<State>` from `core/state_management`
 - Inject dependencies via constructor; annotation handles wiring
+- Use `safeEmit` instead of `emit` — guards against emitting after `close()`
 - Use `state.copyWith(status: ...)` to transition — preserves all existing state data
-- `emit()` is safe after `close()` in `bloc` ^8 — framework ignores emissions on closed cubit (logs warning). No custom `safeEmit` mixin needed.
-- For explicit guard, check `isClosed` before async emit if desired.
 
 ### Shared Status Enum — DataLoadStatus
 

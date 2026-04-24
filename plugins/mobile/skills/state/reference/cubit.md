@@ -11,7 +11,25 @@
 
 ## CubitMixin and safeEmit
 
-Use `CubitMixin<State>` from `core/state_management` to get `safeEmit` — guards against emitting after `close()`.
+`CubitMixin<State>` lives in `core/state_management`. Implementation:
+
+```dart
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+/// {@template cubit_mixin}
+/// A mixin to extend functionality for Cubit
+/// {@endtemplate}
+mixin CubitMixin<State> on Cubit<State> {
+  /// Safely emits a new state if the Cubit is not closed.
+  void safeEmit(State state) {
+    if (!isClosed) {
+      emit(state);
+    }
+  }
+}
+```
+
+Mix in to get `safeEmit` — guards against emitting after `close()`.
 
 ```dart
 @injectable

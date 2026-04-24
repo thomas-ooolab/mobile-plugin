@@ -188,12 +188,13 @@ Routes use `AppPageRoute` from `components/route/`:
 
 ```dart
 // screens/[feature]/[feature]_route.dart
-import 'package:app/components/route/app_page_route.dart';
+import 'package:app/components/route/route.dart';
 
 class FeatureRoute extends AppPageRoute<FeatureData, FeatureResult> {
   FeatureRoute({
     required FeatureData data,
   }) : super(
+          path: '/feature-name',
           builder: (context) => BlocProvider(
             create: (_) => sl<FeatureCubit>(),
             child: const FeatureScreen(),
@@ -202,6 +203,10 @@ class FeatureRoute extends AppPageRoute<FeatureData, FeatureResult> {
         );
 }
 ```
+
+Access route input data inside the screen via `context.arguments<FeatureData>()`.
+
+See [`reference/navigation.md`](reference/navigation.md) for full navigation API — push methods, pop variants, `RouteData`, and `AppRouteObserver`.
 
 #### Complete Real-World Examples
 
@@ -328,14 +333,18 @@ class FeatureCubit extends Cubit<FeatureState> with CubitMixin<FeatureState> {
 
 ### Routes
 
-- Extend `AppPageRoute`; implement `buildPage`
-- `RouteSettings(name: '/feature-name')`
-- Build screen widget in `buildPage`; provide cubit via `BlocProvider`
+- Extend `AppPageRoute<Data, Result>` — `Data extends RouteData?`, `Result` is the return type
+- Pass required `path` (sets `RouteSettings.name` automatically) and `builder`
+- Provide cubit via `BlocProvider` inside `builder`
+- Access route input data in screen via `context.arguments<Data>()`
+- Use `isUsingRootNavigator: true` for routes that must overlay tabs/bottom nav
+- Use `enableTransition: false` to suppress forward animation (back animation preserved)
 
 ```dart
 class FeatureRoute extends AppPageRoute<FeatureData, FeatureResult> {
   FeatureRoute({required FeatureData data})
       : super(
+          path: '/feature-name',
           builder: (_) => BlocProvider(
             create: (_) => sl<FeatureCubit>(),
             child: const FeatureScreen(),
