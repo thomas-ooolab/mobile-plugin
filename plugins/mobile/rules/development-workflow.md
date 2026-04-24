@@ -15,7 +15,11 @@ This repository is **indexed by GitNexus**. For anything that depends on underst
 
 ---
 
-**When to run this process:** Only when the developer provides **requirements**. Then follow steps 1–5 in order. (If there are no requirements, do not assume or invent them.)
+**When to run this process:** Only when the developer provides **requirements**. Then follow steps 0–5 in order. (If there are no requirements, do not assume or invent them.)
+
+0. **Determine task type**
+   Analyze the requirements and classify the task using the type conventions in `@workflow` (Branch Naming Convention). Use the type to name the branch (step 2), pick subagents (step 3), and frame the implementation approach.
+   If the type is ambiguous from the requirements, ask the user before proceeding.
 
 1. **Update `release-notes.txt`**
    - If a ticket ID was provided, set the content to the issue tracker URL (e.g. `https://<your-tracker>/browse/<ticket_ID>`).
