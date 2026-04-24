@@ -15,16 +15,21 @@ This repository is **indexed by GitNexus**. For anything that depends on underst
 
 ---
 
-**When to run this process:** Only when the developer provides a **ticket ID** and **requirements**. Then follow steps 1–5 in order. (If there is no ticket ID or no requirements, do not assume or invent them.)
+**When to run this process:** Only when the developer provides **requirements**. Then follow steps 1–5 in order. (If there are no requirements, do not assume or invent them.)
 
-1. **Update `release-notes.txt`**  
-   Set the content to the issue tracker URL for the ticket (e.g. `https://<your-tracker>/browse/<ticket_ID>`).
+1. **Update `release-notes.txt`**
+   - If a ticket ID was provided, set the content to the issue tracker URL (e.g. `https://<your-tracker>/browse/<ticket_ID>`).
+   - If no ticket ID was provided, ask the user: "What is the ticket ID for this task? (Enter the ID, or type 'skip' to skip this step.)"
+     - If the user provides an ID, set `release-notes.txt` to the corresponding issue tracker URL.
+     - If the user types `skip` or declines, leave `release-notes.txt` unchanged and skip step 2 as well — proceed directly to step 3.
 
 2. **Create a new branch**  
    Follow branch naming and type conventions in `@workflow`. Example: new feature → branch `feat/PROJ-123` from the target branch.
+   (Skip this step if step 1 was skipped.)
 
 3. **Implement the requirements**  
    Based on the provided requirements and your analysis, implement the work (delegate to subagents when the task matches the table below).
+   - Before starting implementation, if you have any concerns (ambiguous requirements, conflicting constraints, unclear scope, risky changes), pause and present your suggestions to the user as numbered options. Let the user choose which approach to take. Do not proceed until the user has selected an option or confirmed your proposed approach.
 
 4. **After finishing code changes: MUST use `/test-writer`**  
    Invoke the test-writer subagent to add or update the test suite for the changes. Do not consider the task complete until tests have been written or updated for the modified code.
