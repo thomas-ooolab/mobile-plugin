@@ -1,5 +1,170 @@
 # Navigation Reference
 
+## Base Class Implementations
+
+### AppPageRoute
+
+```dart
+// components/route/app_page_route.dart
+import 'package:flutter/material.dart';
+import 'package:app/components/route/route_data.dart';
+import 'package:provider/provider.dart';
+
+abstract base class AppPageRoute<
+  Data extends RouteData?,
+  Result extends Object?
+> extends MaterialPageRoute<Result> {
+  AppPageRoute({
+    required WidgetBuilder builder,
+    required this.path,
+    this.enableTransition = true,
+    Data? data,
+    this.isUsingRootNavigator = false,
+  }) : super(
+         builder: (context) =>
+             Provider<RouteData?>.value(value: data, child: builder(context)),
+         settings: RouteSettings(name: path, arguments: data),
+       );
+
+  final bool enableTransition;
+  final String path;
+  final bool isUsingRootNavigator;
+
+  @override
+  Duration get transitionDuration =>
+      enableTransition ? super.transitionDuration : Duration.zero;
+
+  @override
+  Duration get reverseTransitionDuration => enableTransition
+      ? super.reverseTransitionDuration
+      : const Duration(milliseconds: 300);
+}
+```
+
+### RouteData
+
+```dart
+// components/route/route_data.dart
+abstract base class RouteData {
+  const RouteData();
+  Map<String, String>? toMap() => null;
+}
+```
+
+### NavigatorExtension
+
+```dart
+// components/route/navigator.dart
+extension NavigatorExtension on BuildContext {
+  NavigatorState _navState({bool? rootNavigator}) =>
+      Navigator.of(this, rootNavigator: rootNavigator ?? false);
+
+  Future<Result?> push<Result extends Object?>(
+    AppPageRoute<RouteData?, Result> route,
+  ) => _navState(rootNavigator: route.isUsingRootNavigator).push(route);
+
+  Future<Result?> pushReplacement<Result extends Object?, ResultTO extends Object?>(
+    AppPageRoute<RouteData?, Result> route, {
+    ResultTO? routeResult,
+  }) => _navState(rootNavigator: route.isUsingRootNavigator)
+          .pushReplacement(route, result: routeResult) as Future<Result>;
+
+  void pop<Result extends Object?>({Result? routeResult, bool? rootNavigator}) {
+    if (_navState(rootNavigator: rootNavigator).canPop()) {
+      _navState(rootNavigator: rootNavigator).pop(routeResult);
+    }
+  }
+
+  Future<Result?> pushToFirst<Result extends Object?>(
+    AppPageRoute<RouteData?, Result> route,
+  ) => _navState(rootNavigator: route.isUsingRootNavigator)
+          .pushAndRemoveUntil(route, (r) => r.isFirst);
+
+  Future<Result?> pushToTop<Result extends Object?>(
+    AppPageRoute<RouteData?, Result> route,
+  ) => _navState(rootNavigator: route.isUsingRootNavigator)
+          .pushAndRemoveUntil(route, (r) => false);
+
+  void popUntilRouteOrFirst({AppPageRoute? expectedRoute}) {
+    popUntil((route) =>
+        (expectedRoute != null &&
+            expectedRoute.settings.name == route.settings.name) ||
+        route.isFirst);
+  }
+
+  void popUntil(RoutePredicate predicate, {bool? rootNavigator}) =>
+      _navState(rootNavigator: rootNavigator).popUntil(predicate);
+
+  Data arguments<Data extends RouteData?>() {
+    try {
+      return read<RouteData?>() as Data;
+    } catch (_) {
+      return null as Data;
+    }
+  }
+
+  bool isCurrentRoute(AppPageRoute<RouteData?, dynamic> route) =>
+      read<AppRouteObserver>().isCurrentRoute(route);
+}
+```
+
+### AppRouteObserver
+
+```dart
+// components/route/observer/app_route_observer.dart
+class AppRouteObserver extends RouteObserver<ModalRoute<dynamic>> {
+  AppRouteObserver({required AnalyticsRepository analyticsRepository})
+    : _analyticsRepository = analyticsRepository;
+
+  final AnalyticsRepository _analyticsRepository;
+  final Map<Route<dynamic>, RouteSettings> _histories = {};
+
+  void _sendScreenView(Route<dynamic> route) {
+    final screenName = route.settings.name;
+    final routeData = route.settings.arguments as RouteData?;
+    if (screenName?.isNotEmpty ?? false) {
+      _analyticsRepository.trackRoute(
+        screenName: screenName!,
+        parameters: routeData?.toMap(),
+      );
+      Clarity.setCurrentScreenName(screenName);
+    }
+  }
+
+  bool _routeFilter(Route<dynamic>? route) =>
+      route is PageRoute || route is DialogRoute;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    super.didPush(route, previousRoute);
+    _histories.putIfAbsent(route, () => route.settings);
+    if (_routeFilter(route)) _sendScreenView(route);
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+    if (newRoute != null && _routeFilter(newRoute)) _sendScreenView(newRoute);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    super.didPop(route, previousRoute);
+    _histories.remove(route);
+    if (previousRoute != null && _routeFilter(previousRoute) && _routeFilter(route)) {
+      _sendScreenView(previousRoute);
+    }
+  }
+
+  bool isCurrentRoute(AppPageRoute route) {
+    final lastRouteSettings = _histories.values.last;
+    return route.settings.name == lastRouteSettings.name;
+  }
+}
+```
+
+---
+
 ## AppPageRoute
 
 `AppPageRoute<Data, Result>` extends `MaterialPageRoute<Result>`.

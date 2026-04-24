@@ -1,5 +1,122 @@
 # Pagination Reference
 
+## Base Class Implementations
+
+### PaginationInterface
+
+```dart
+// components/pagination/interfaces/pagination_interface.dart
+abstract interface class PaginationInterface<T> {
+  int get limit;
+  bool get isInitialLoading;
+  bool get isLoading;
+  bool get isRefreshing;
+  bool get isError;
+  List<T> get items;
+  void loadMore();
+}
+```
+
+### RefreshInterface
+
+```dart
+// components/pagination/interfaces/refresh_interface.dart
+abstract interface class RefreshInterface {
+  Future<void> refresh();
+}
+```
+
+### PaginationCubitMixin
+
+```dart
+// components/pagination/mixins/pagination_cubit_mixin.dart
+mixin PaginationCubitMixin<Model, State> on Cubit<State>
+    implements PaginationInterface<Model>, RefreshInterface {
+  bool _isLoading = false;
+  bool _isRefreshing = false;
+  int _page = 0;
+  int _total = 0;
+  int _limit = PaginationConst.pageLimit; // default 10
+  bool _isError = false;
+  final List<Model> _items = [];
+
+  @override bool get isRefreshing => _isRefreshing;
+  @override bool get isLoading => _isLoading;
+  @override int get limit => _limit;
+  set limit(int value) => _limit = value;
+  @override List<Model> get items => _items;
+
+  int get nextPage => _page + 1;
+  int get total => _total;
+
+  // MUST override — call API here; call addMore(); emit success
+  Future<void> getPageData();
+
+  // MUST override — emit failure state
+  void onException();
+
+  bool get _ended => items.length == total;
+  bool get _ableToLoadMore => !isLoading && !isRefreshing && !_ended;
+
+  Future<void> _load() async {
+    _isError = false;
+    _isLoading = true;
+    try {
+      await getPageData();
+    } catch (e, s) {
+      onError(e, s);
+      _isError = true;
+      _isLoading = false;
+      _isRefreshing = false;
+      _page = 0;
+      _items.clear();
+      onException();
+    } finally {
+      _isLoading = false;
+      _isRefreshing = false;
+    }
+  }
+
+  @mustCallSuper
+  Future<void> loadInitial() async => _load();
+
+  // Accumulates items from API response — call inside getPageData()
+  void addMore({required Pagination<Model> pagination}) {
+    _page = pagination.page;
+    _total = pagination.total;
+    if (_isRefreshing) _items.clear();
+    if (pagination.items != null) _items.addAll(pagination.items!);
+  }
+
+  @mustCallSuper
+  @override
+  Future<void> refresh() async {
+    if (_isLoading) return;
+    _isRefreshing = true;
+    _page = 0;
+    await _load();
+  }
+
+  void reset() {
+    _page = 0;
+    _items.clear();
+  }
+
+  @override
+  void loadMore() {
+    if (_ableToLoadMore) unawaited(_load());
+  }
+
+  @override
+  bool get isError => _isError;
+
+  @override
+  bool get isInitialLoading => (_page == 0) && !isRefreshing && !isError;
+}
+```
+
+---
+
 ## Overview
 
 | Component | Role |
