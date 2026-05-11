@@ -5,9 +5,7 @@
 set -euo pipefail
 
 # Script metadata
-_script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly SCRIPT_DIR="${_script_dir}"
-_root_dir="$(cd "${SCRIPT_DIR}" && git rev-parse --show-toplevel 2>/dev/null)" || _root_dir="$(cd "${SCRIPT_DIR}/.." && pwd)"
+_root_dir="$(git rev-parse --show-toplevel 2>/dev/null)" || _root_dir="$(pwd)"
 readonly ROOT_DIR="${_root_dir}"
 
 # Global flags
