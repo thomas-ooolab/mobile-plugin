@@ -7,17 +7,18 @@ description: Format, stage, commit with conventional message, and push to origin
 
 Run the project's commit workflow: format, stage, commit, and push with the given message.
 
-**Execute the script:**
+**Locate the script from the plugin cache:**
 
 ```bash
-scripts/push.sh
+PUSH_SH="$(find "${HOME}/.claude/plugins/cache/ooolab/mobile" -name "push.sh" -path "*/commands/scripts/*" 2>/dev/null | sort | tail -1)"
 ```
 
+> Script source in this repo: `plugins/mobile/commands/scripts/push.sh`
 
 The script requires a commit message. Pass it via:
 
-- **Environment variable:** `COMMIT_MESSAGE="Your message" scripts/push.sh`
-- **CLI argument:** `scripts/push.sh -m "Your message"` or `scripts/push.sh --message "Your message"`
+- **Environment variable:** `COMMIT_MESSAGE="Your message" bash "$PUSH_SH"`
+- **CLI argument:** `bash "$PUSH_SH" -m "Your message"` or `bash "$PUSH_SH" --message "Your message"`
 
 **Commit message format:**
 
@@ -57,14 +58,15 @@ When the user runs `/commit`:
 1. **Determine the type of change** from the diff (feat, fix, refactor, test, ci, docs, chore, or `!` for breaking).
 2. **Read ticket ID** from `release-notes.txt` if present (e.g. LOE-6144).
 3. **Build the message** in the form `type: [TICKET-ID]: short description` (e.g. `feat: LOE-6144: add dark mode toggle`).
-4. Run:
+4. Locate the script and run:
 
 ```bash
-COMMIT_MESSAGE="<generated message>" scripts/push.sh
+PUSH_SH="$(find "${HOME}/.claude/plugins/cache/ooolab/mobile" -name "push.sh" -path "*/commands/scripts/*" 2>/dev/null | sort | tail -1)"
+COMMIT_MESSAGE="<generated message>" bash "$PUSH_SH"
 ```
 
 or
 
 ```bash
-scripts/push.sh -m "<generated message>"
+bash "$PUSH_SH" -m "<generated message>"
 ```

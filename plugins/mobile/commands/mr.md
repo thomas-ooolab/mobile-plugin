@@ -7,17 +7,18 @@ description: Create GitLab MR with conventional title format and ticket ID from 
 
 Run the project's MR workflow: create a Merge Request on GitLab using the glab CLI. The script pushes the current branch, then creates an MR with a generated title and the default description template.
 
-**Execute the script:**
+**Locate the script from the plugin cache:**
 
 ```bash
-scripts/mr.sh
+MR_SH="$(find "${HOME}/.claude/plugins/cache/ooolab/mobile" -name "mr.sh" -path "*/commands/scripts/*" 2>/dev/null | sort | tail -1)"
 ```
 
+> Script source in this repo: `plugins/mobile/commands/scripts/mr.sh`
 
 The user can provide the MR title (the description part). Pass it via:
 
-- **Environment variable:** `MR_TITLE="Your title" scripts/mr.sh`
-- **CLI argument:** `scripts/mr.sh -t "Your title"` or `scripts/mr.sh --title "Your title"`
+- **Environment variable:** `MR_TITLE="Your title" bash "$MR_SH"`
+- **CLI argument:** `bash "$MR_SH" -t "Your title"` or `bash "$MR_SH" --title "Your title"`
 
 **Optional overrides:**
 
@@ -64,7 +65,7 @@ feat: LOE-6156: Course Completion Pop-up & Recommendation Prompt
 | `docs`     | Documentation |
 | `chore`    | Chore (tooling, scripts, housekeeping) |
 
-If `release-notes.txt` exists and contains a ticket ID, the final MR title will include that ID (the script enforces this, same as [push.sh](scripts/push.sh) for commit messages).
+If `release-notes.txt` exists and contains a ticket ID, the final MR title will include that ID (the script enforces this, same as [push.sh](push.md) for commit messages).
 
 ---
 
@@ -83,20 +84,21 @@ When the user runs `/mr` and provides a title (e.g. "Course Completion Pop-up & 
 1. **Ticket ID** is read from `release-notes.txt` if present.
 2. **Type** is derived from the current branch name (e.g. `feat/LOE-6156` → `feat`).
 3. **Build the MR title** as `type: TICKET-ID: user title` (e.g. `feat: LOE-6156: Course Completion Pop-up & Recommendation Prompt`).
-4. Run:
+4. Locate the script and run:
 
 ```bash
-MR_TITLE="Course Completion Pop-up & Recommendation Prompt" scripts/mr.sh
+MR_SH="$(find "${HOME}/.claude/plugins/cache/ooolab/mobile" -name "mr.sh" -path "*/commands/scripts/*" 2>/dev/null | sort | tail -1)"
+MR_TITLE="Course Completion Pop-up & Recommendation Prompt" bash "$MR_SH"
 ```
 
 or with target branch:
 
 ```bash
-MR_TARGET_BRANCH=feat/LOE-6156 MR_TITLE="Course Completion Pop-up & Recommendation Prompt" scripts/mr.sh
+MR_TARGET_BRANCH=feat/LOE-6156 MR_TITLE="Course Completion Pop-up & Recommendation Prompt" bash "$MR_SH"
 ```
 
 or via CLI:
 
 ```bash
-scripts/mr.sh -t "Course Completion Pop-up & Recommendation Prompt"
+bash "$MR_SH" -t "Course Completion Pop-up & Recommendation Prompt"
 ```
