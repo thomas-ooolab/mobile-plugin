@@ -13,6 +13,8 @@ Run the project's MR workflow: create a Merge Request on GitLab using the glab C
 scripts/mr.sh
 ```
 
+> Script source in this repo: `plugins/mobile/commands/scripts/mr.sh`
+
 The user can provide the MR title (the description part). Pass it via:
 
 - **Environment variable:** `MR_TITLE="Your title" scripts/mr.sh`

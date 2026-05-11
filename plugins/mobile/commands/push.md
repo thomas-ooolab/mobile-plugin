@@ -13,6 +13,8 @@ Run the project's commit workflow: format, stage, commit, and push with the give
 scripts/push.sh
 ```
 
+> Script source in this repo: `plugins/mobile/commands/scripts/push.sh`
+
 The script requires a commit message. Pass it via:
 
 - **Environment variable:** `COMMIT_MESSAGE="Your message" scripts/push.sh`
