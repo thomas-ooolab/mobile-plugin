@@ -18,7 +18,17 @@ The user can provide the MR title (the description part). Pass it via:
 - **Environment variable:** `MR_TITLE="Your title" scripts/mr.sh`
 - **CLI argument:** `scripts/mr.sh -t "Your title"` or `scripts/mr.sh --title "Your title"`
 
-**Optional:** Set target branch with `MR_TARGET_BRANCH=feat/LOE-6156`. Use `--draft` for a draft MR, or `-l "label1,label2"` for labels.
+**Optional overrides:**
+
+| Variable / flag | Default | Purpose |
+| --- | --- | --- |
+| `MR_TARGET_BRANCH=<branch>` | GitLab project default | Override target branch |
+| `MR_DRAFT=true` / `--draft` | `false` | Create as draft MR |
+| `MR_LABELS="label1,label2"` / `-l "label1,label2"` | `learningos` | Override labels |
+
+**Prerequisite:** `glab` CLI must be installed and in `PATH`. The script exits immediately if it is not found.
+
+**If no title is provided**, the script falls back to the last commit subject (`git log -1 --pretty=%s`); if that is also empty, it uses `"MR: <branch>"`.
 
 ---
 
@@ -46,7 +56,7 @@ feat: LOE-6156: Course Completion Pop-up & Recommendation Prompt
 | ---------- | ------- |
 | `feat`     | New feature (non-breaking change which adds functionality) |
 | `fix`      | Bug fix (non-breaking change which fixes an issue) |
-| `!`        | Breaking change |
+| `!` / `breaking` | Breaking change |
 | `refactor` | Code refactor |
 | `test`     | Unit test |
 | `ci`       | Build / CI configuration change |
@@ -59,10 +69,13 @@ If `release-notes.txt` exists and contains a ticket ID, the final MR title will 
 
 ## Steps performed by the script
 
-1. Read user title from `MR_TITLE` or `-t`/`--title` (optional).
-2. Generate full MR title: `<type>: [TICKET-ID]: <user title>` (type from branch, ticket from `release-notes.txt`).
-3. Push current branch to `origin` if needed.
-4. Create Merge Request with glab using the generated title, default description template (Default.md), and optional target branch/labels/draft.
+1. Verify `git` repo and `glab` CLI are available (exits immediately if `glab` is missing).
+2. Read user title from `MR_TITLE` or `-t`/`--title`. If omitted, falls back to last commit subject, then `"MR: <branch>"`.
+3. Generate full MR title: `<type>: [TICKET-ID]: <user title>` (type from branch prefix, ticket from `release-notes.txt`). If user title already contains the ticket ID it is used as-is.
+4. Load MR description from `.gitlab/merge_request_templates/Default.md` (exits if file is missing).
+5. Push current branch to `origin` (always — not conditional).
+6. Create Merge Request non-interactively with `glab mr create -y` using generated title, loaded description, and optional target branch/labels/draft flag.
+7. Open the created MR URL in the default browser.
 
 When the user runs `/mr` and provides a title (e.g. "Course Completion Pop-up & Recommendation Prompt"):
 
