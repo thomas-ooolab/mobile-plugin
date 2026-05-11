@@ -47,7 +47,7 @@ If `release-notes.txt` exists and contains a ticket ID (e.g. `LOE-6144`), the co
 
 **Steps performed by the script:**
 
-1. If the diff only touches `test/`, `**/`, and `**/test/`, format code with `fvm dart format .` (or `dart format .` if `.fvmrc` is absent or `fvm` is unavailable). **If this step fails, the script exits immediately** and does not stage, commit, or push. Fix the reported issues, then run the push command again.
+1. If every changed file is under `lib/`, `test/`, `<pkg>/lib/`, or `<pkg>/test/` (e.g. `data/lib/`, `domain/test/`), format code with `fvm dart format .` (or `dart format .` if `fvm` is not installed). Changes outside those directories skip formatting entirely. **If formatting fails, the script exits immediately** and does not stage, commit, or push. Fix the reported issues, then run the push command again.
 2. Read commit message from `COMMIT_MESSAGE` or `-m`/`--message`
 3. Stage all changes, commit, and push (set upstream if needed)
 
