@@ -10,15 +10,14 @@ Run the project's MR workflow: create a Merge Request on GitLab using the glab C
 **Execute the script:**
 
 ```bash
-scripts/mr.sh
+plugins/mobile/commands/scripts/mr.sh
 ```
 
-> Script source in this repo: `plugins/mobile/commands/scripts/mr.sh`
 
 The user can provide the MR title (the description part). Pass it via:
 
-- **Environment variable:** `MR_TITLE="Your title" scripts/mr.sh`
-- **CLI argument:** `scripts/mr.sh -t "Your title"` or `scripts/mr.sh --title "Your title"`
+- **Environment variable:** `MR_TITLE="Your title" plugins/mobile/commands/scripts/mr.sh`
+- **CLI argument:** `plugins/mobile/commands/scripts/mr.sh -t "Your title"` or `plugins/mobile/commands/scripts/mr.sh --title "Your title"`
 
 **Optional overrides:**
 
@@ -65,7 +64,7 @@ feat: LOE-6156: Course Completion Pop-up & Recommendation Prompt
 | `docs`     | Documentation |
 | `chore`    | Chore (tooling, scripts, housekeeping) |
 
-If `release-notes.txt` exists and contains a ticket ID, the final MR title will include that ID (the script enforces this, same as [push.sh](scripts/push.sh) for commit messages).
+If `release-notes.txt` exists and contains a ticket ID, the final MR title will include that ID (the script enforces this, same as [push.sh](plugins/mobile/commands/scripts/push.sh) for commit messages).
 
 ---
 
@@ -87,17 +86,17 @@ When the user runs `/mr` and provides a title (e.g. "Course Completion Pop-up & 
 4. Run:
 
 ```bash
-MR_TITLE="Course Completion Pop-up & Recommendation Prompt" scripts/mr.sh
+MR_TITLE="Course Completion Pop-up & Recommendation Prompt" plugins/mobile/commands/scripts/mr.sh
 ```
 
 or with target branch:
 
 ```bash
-MR_TARGET_BRANCH=feat/LOE-6156 MR_TITLE="Course Completion Pop-up & Recommendation Prompt" scripts/mr.sh
+MR_TARGET_BRANCH=feat/LOE-6156 MR_TITLE="Course Completion Pop-up & Recommendation Prompt" plugins/mobile/commands/scripts/mr.sh
 ```
 
 or via CLI:
 
 ```bash
-scripts/mr.sh -t "Course Completion Pop-up & Recommendation Prompt"
+plugins/mobile/commands/scripts/mr.sh -t "Course Completion Pop-up & Recommendation Prompt"
 ```
