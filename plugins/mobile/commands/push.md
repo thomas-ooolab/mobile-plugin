@@ -10,14 +10,14 @@ Run the project's commit workflow: format, stage, commit, and push with the give
 **Execute the script:**
 
 ```bash
-plugins/mobile/commands/scripts/push.sh
+scripts/push.sh
 ```
 
 
 The script requires a commit message. Pass it via:
 
-- **Environment variable:** `COMMIT_MESSAGE="Your message" plugins/mobile/commands/scripts/push.sh`
-- **CLI argument:** `plugins/mobile/commands/scripts/push.sh -m "Your message"` or `plugins/mobile/commands/scripts/push.sh --message "Your message"`
+- **Environment variable:** `COMMIT_MESSAGE="Your message" scripts/push.sh`
+- **CLI argument:** `scripts/push.sh -m "Your message"` or `scripts/push.sh --message "Your message"`
 
 **Commit message format:**
 
@@ -60,11 +60,11 @@ When the user runs `/commit`:
 4. Run:
 
 ```bash
-COMMIT_MESSAGE="<generated message>" plugins/mobile/commands/scripts/push.sh
+COMMIT_MESSAGE="<generated message>" scripts/push.sh
 ```
 
 or
 
 ```bash
-plugins/mobile/commands/scripts/push.sh -m "<generated message>"
+scripts/push.sh -m "<generated message>"
 ```
