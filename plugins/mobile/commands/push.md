@@ -5,7 +5,11 @@ description: Format, stage, commit with conventional message, and push to origin
 
 # Commit
 
+Arguments: $ARGUMENTS
+
 Run the project's commit workflow: format, stage, commit, and push with the given message.
+
+If `$ARGUMENTS` is non-empty, use it as the commit message directly (skip generating from diff).
 
 **Locate the script from the plugin cache:**
 

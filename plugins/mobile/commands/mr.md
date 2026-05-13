@@ -5,7 +5,11 @@ description: Create GitLab MR with conventional title format and ticket ID from 
 
 # Merge Request
 
-Run the project's MR workflow: create a Merge Request on GitLab using the glab CLI. The script pushes the current branch, then creates an MR with a generated title and the default description template.
+Arguments: $ARGUMENTS
+
+Run the project's MR workflow: create a Merge Request on GitLab using the glab CLI.
+
+If `$ARGUMENTS` is non-empty, use it as the MR title description (the `<description>` part in `type: TICKET-ID: description`). The script pushes the current branch, then creates an MR with a generated title and the default description template.
 
 **Locate the script from the plugin cache:**
 
